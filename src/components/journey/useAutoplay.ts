@@ -61,7 +61,8 @@ export function useAutoplay({ count, stepMs, enabled, rootRef }: Options): {
     (i: number) => {
       setStopped(true);
       setIndex(i);
-      progress.set(1);
+      // jump() also stops the step animation in flight; with set() it could keep writing until the effect cleanup.
+      progress.jump(1);
     },
     [progress],
   );

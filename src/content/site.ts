@@ -104,7 +104,7 @@ export const claudeCode: {
 
 export const sections: {
   brand: string;
-  journey: { title: string };
+  journey: { title: string; tabsLabel: string; stepLabel: string };
   trust: { title: string; intro: string };
   install: {
     title: string;
@@ -120,7 +120,7 @@ export const sections: {
   footer: { github: string; npm: string; readme: string; license: string };
 } = {
   brand: 'Job Applications Tracker',
-  journey: { title: 'How it works' },
+  journey: { title: 'How it works', tabsLabel: 'Journey steps', stepLabel: 'Step' },
   trust: {
     title: 'Why you can trust it',
     intro: 'It is a single-user tool that runs on your machine and works through your agent.',

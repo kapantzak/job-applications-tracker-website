@@ -5,6 +5,7 @@ import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
 import Install from '../components/Install.astro';
+import { Journey } from '../components/journey/Journey';
 import Trust from '../components/Trust.astro';
 import { journeySteps, meta, sections } from '../content/site';
 ---
@@ -14,20 +15,9 @@ import { journeySteps, meta, sections } from '../content/site';
   <main>
     <Hero />
 
-    <!-- Static step list until Task 7 adds the Journey island. -->
-    <section id="journey" aria-labelledby="journey-title" class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+    <section id="journey" aria-labelledby="journey-title" class="mx-auto w-full max-w-6xl px-4 pt-16 pb-16 sm:px-6 sm:pt-24 lg:px-8 lg:pb-0">
       <h2 id="journey-title" class="text-3xl font-bold tracking-tight sm:text-4xl">{sections.journey.title}</h2>
-      <ol class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {
-          journeySteps.map((step, i) => (
-            <li class="rounded-xl border border-border bg-card p-6 text-card-foreground">
-              <p class="text-sm font-medium text-muted-foreground">Step {i + 1}</p>
-              <h3 class="mt-1 text-lg font-semibold tracking-tight">{step.title}</h3>
-              <p class="mt-2 text-muted-foreground">{step.line}</p>
-            </li>
-          ))
-        }
-      </ol>
+      <Journey steps={journeySteps} client:visible />
     </section>
 
     <Trust />

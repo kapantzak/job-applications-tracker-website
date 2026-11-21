@@ -62,6 +62,21 @@ describe('useAutoplay', () => {
     expect(result.current.index).toBe(3);
   });
 
+  it('select ends the running step animation at once', () => {
+    const { result } = setup();
+    tick(STEP / 2);
+    expect(result.current.progress.isAnimating()).toBe(true);
+    let animatingAfterSelect: boolean | undefined;
+    act(() => {
+      result.current.select(2);
+      // Checked before React re-renders, so the effect cleanup cannot be what stopped it.
+      animatingAfterSelect = result.current.progress.isAnimating();
+    });
+    expect(animatingAfterSelect).toBe(false);
+    tick(STEP);
+    expect(result.current.progress.get()).toBe(1);
+  });
+
   it('does nothing when disabled', () => {
     const { result } = setup(false);
     tick(STEP * 3);
