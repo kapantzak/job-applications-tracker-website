@@ -1,5 +1,6 @@
 ---
 import { claudeCode } from '../content/site';
+import CopyCommand from './CopyCommand';
 ---
 
 <section id="claude-code" aria-labelledby="claude-code-title" class="border-y border-border bg-muted/40">
@@ -25,11 +26,8 @@ import { claudeCode } from '../content/site';
             </div>
             <p class="mt-3 text-muted-foreground">{step.body}</p>
             {step.command && (
-              <div class="mt-5 flex max-w-full items-center gap-3 self-start rounded-lg border border-border bg-background px-4 py-2.5 font-mono text-sm">
-                <span class="text-muted-foreground select-none" aria-hidden="true">
-                  $
-                </span>
-                <code>{step.command}</code>
+              <div class="mt-5 self-start">
+                <CopyCommand client:visible command={step.command} location="claude-code" />
               </div>
             )}
           </li>
