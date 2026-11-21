@@ -60,7 +60,7 @@ export default function CopyCommand({ command, location }: Props) {
           type="button"
           onClick={copy}
           aria-label="Copy install command"
-          className="ml-auto shrink-0 [@media(scripting:none)]:hidden rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          className="ml-auto shrink-0 [@media(scripting:none)]:hidden rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
         >
           Copy
         </button>

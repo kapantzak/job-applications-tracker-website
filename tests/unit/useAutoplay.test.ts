@@ -77,6 +77,26 @@ describe('useAutoplay', () => {
     expect(result.current.progress.get()).toBe(1);
   });
 
+  it('stop keeps the current step, shows its final state and ends autoplay', () => {
+    const { result } = setup();
+    tick(STEP);
+    tick(STEP / 2);
+    expect(result.current.index).toBe(1);
+    expect(result.current.progress.isAnimating()).toBe(true);
+    let animatingAfterStop: boolean | undefined;
+    act(() => {
+      result.current.stop();
+      animatingAfterStop = result.current.progress.isAnimating();
+    });
+    expect(animatingAfterStop).toBe(false);
+    expect(result.current.stopped).toBe(true);
+    expect(result.current.index).toBe(1);
+    expect(result.current.progress.get()).toBe(1);
+    tick(STEP * 3);
+    expect(result.current.index).toBe(1);
+    expect(result.current.progress.get()).toBe(1);
+  });
+
   it('does nothing when disabled', () => {
     const { result } = setup(false);
     tick(STEP * 3);

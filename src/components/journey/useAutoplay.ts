@@ -12,6 +12,7 @@ export function useAutoplay({ count, stepMs, enabled, rootRef }: Options): {
   index: number;
   progress: MotionValue<number>;
   select(i: number): void;
+  stop(): void;
   stopped: boolean;
 } {
   const [index, setIndex] = useState(0);
@@ -57,15 +58,20 @@ export function useAutoplay({ count, stepMs, enabled, rootRef }: Options): {
     };
   }, [enabled, running, index, count, stepMs, progress]);
 
+  // Stops autoplay for good and shows the current step's final state.
+  const stop = useCallback(() => {
+    setStopped(true);
+    // jump() also stops the step animation in flight; with set() it could keep writing until the effect cleanup.
+    progress.jump(1);
+  }, [progress]);
+
   const select = useCallback(
     (i: number) => {
-      setStopped(true);
+      stop();
       setIndex(i);
-      // jump() also stops the step animation in flight; with set() it could keep writing until the effect cleanup.
-      progress.jump(1);
     },
-    [progress],
+    [stop],
   );
 
-  return { index, progress, select, stopped };
+  return { index, progress, select, stop, stopped };
 }

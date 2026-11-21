@@ -86,6 +86,18 @@ test.describe('narrow', () => {
     await expect(tabs(page).nth(3)).toHaveAttribute('aria-selected', 'true');
   });
 
+  test('narrow focus inside the journey stops autoplay', async ({ page }) => {
+    await page.goto('/');
+    await hydrate(page);
+    await tabs(page).first().focus();
+    await expect(tabs(page).first()).toBeFocused();
+    const selected = page.locator('#journey [role="tab"][aria-selected="true"]');
+    const before = await selected.getAttribute('id');
+    await page.waitForTimeout(7000);
+    await expect(selected).toHaveAttribute('id', before ?? '');
+    await expect(selected).toHaveCount(1);
+  });
+
   test('reduced motion narrow', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/');

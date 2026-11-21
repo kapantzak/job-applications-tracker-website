@@ -105,9 +105,14 @@ export function Journey({ steps }: { steps: JourneyStep[] }) {
     tabRefs.current[next]?.focus();
   }
 
+  // A visitor who focuses or touches anything in the journey is reading it: stop moving it.
+  const stopAutoplay = mode === 'autoplay' ? autoplay.stop : undefined;
+
   return (
     <div
       ref={rootRef}
+      onFocus={stopAutoplay}
+      onPointerDown={stopAutoplay}
       className="mt-10 flex flex-col lg:mt-0 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.9fr)] lg:gap-x-12"
     >
       <div className="relative hidden lg:col-start-1 lg:row-start-1 lg:block [@media(scripting:none)]:block">
@@ -183,7 +188,7 @@ export function Journey({ steps }: { steps: JourneyStep[] }) {
                 tabIndex={selected ? 0 : -1}
                 onClick={() => autoplay.select(i)}
                 onKeyDown={onTabKeyDown}
-                className="flex min-h-11 flex-col gap-2 rounded-md pt-2 pb-1 text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background focus-visible:outline-none"
+                className="flex min-h-11 flex-col gap-2 rounded-md pt-2 pb-1 text-left"
               >
                 <span className="block h-1 overflow-hidden rounded-full bg-border">
                   <motion.span
