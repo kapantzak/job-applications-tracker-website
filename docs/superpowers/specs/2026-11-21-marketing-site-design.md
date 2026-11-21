@@ -47,7 +47,7 @@ For this visitor, the pitch is **"no agent setup"** (decision 11). It is not "ze
   - Font: Manrope (variable).
   - Icons: lucide.
   - Copying from the app is fine: same owner, MIT.
-  - The pinned commit is one commit ahead of npm `0.2.0` (a Gmail sync internals change). Site copy must describe behaviour that is in the published npm version.
+  - Facts baseline: the published npm latest, `0.3.0` (tag `v0.3.0`), per decision 26. The original pin `13026cd` was one commit ahead of `0.2.0`.
 - Browsers: at least the app's own baseline (Chrome/Edge 111+, Safari 16.4+, Firefox 128+).
 
 ## Approaches considered
@@ -102,6 +102,17 @@ For this visitor, the pitch is **"no agent setup"** (decision 11). It is not "ze
 20. Focus indicator: a solid, full-strength ring on `:focus-visible`.
 21. Accept that narrow screens with scripts blocked (not disabled) show only step 1's line.
 22. Vercel: turn the Vercel Toolbar off for this project; use a Protection Bypass for Automation secret locally (never committed) to test previews; pin `engines.node` to `24.x`.
+
+### Deployment and v0.3.0 decisions (2026-11-21)
+
+23. Vercel Authentication protects previews only; production is public.
+24. Keep production live: Vercel promoted the first Git deployment of `Initial-implementation` to production before merge. From the merge on, production deploys come from `main`.
+25. Integrate through a pull request into `main` (PR #1).
+26. Fact baseline moves to npm `0.3.0` (now `latest`): copy describes the published latest version. FAQ cost line: "each job search's and Gmail sync's Run page shows what it used".
+27. Dashboard mock follows 0.3.0: tiles, then the full-width "Your applications' journey" flow graph (Applied → Screening → Interview → Offer, each stage with its count and share of the stage before; stops branch off as waiting, rejected, no response, withdrawn), then the top of "Needs attention" peeking at the bottom. The Breakdown view (status bar and funnel) is removed.
+28. Graph animation: flows grow left to right stage by stage; branches and labels fade in as the flow reaches them; tiles count up. Progress-driven and reversible like every screen.
+29. Replace the demo video and poster with the 0.3.0 recording (app commit 052f050).
+30. Step 5 line: "The Dashboard counts what is in progress, shows how far applications get and where they stopped, and lists what needs your attention."
 
 ## Page structure
 
