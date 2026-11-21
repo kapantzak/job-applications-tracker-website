@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { INSTALL_NPX, LINKS, hero } from '../../src/content/site';
+import { INSTALL_NPX, LINKS, hero, sections } from '../../src/content/site';
 
 test('hero h1 is the headline and is the only h1', async ({ page }) => {
   await page.goto('/');
@@ -38,10 +38,19 @@ test('page has the trust, agents and install sections', async ({ page }) => {
   }
 });
 
-test('footer links to GitHub, npm and the licence', async ({ page }) => {
+test('footer links to GitHub, npm, the licence and the author website', async ({ page }) => {
   await page.goto('/');
   const footer = page.locator('footer');
-  for (const href of [LINKS.github, LINKS.npm, LINKS.license]) {
+  for (const href of [LINKS.github, LINKS.npm, LINKS.license, LINKS.website]) {
     await expect(footer.locator(`a[href="${href}"]`)).toHaveCount(1);
   }
+  await expect(footer.locator(`a[href="${LINKS.website}"]`)).toHaveText(sections.footer.website);
+  await expect(footer).toContainText(`${sections.footer.madeBy} ${sections.footer.website}`);
+});
+
+test('hero links to npm', async ({ page }) => {
+  await page.goto('/');
+  const link = page.locator(`#hero a[href="${LINKS.npm}"]`);
+  await expect(link).toBeVisible();
+  await expect(link).toHaveText(sections.hero.npm);
 });
