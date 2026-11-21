@@ -177,15 +177,21 @@ export function MockPageHeader({
   title,
   description,
   actions,
+  badge,
 }: {
   title: string;
   description: string;
   actions?: ReactNode;
+  /** Shown beside the title, for story cues that are not part of the app. */
+  badge?: ReactNode;
 }) {
   return (
     <div className="mb-5 flex items-start justify-between gap-6">
       <div className="space-y-1">
-        <div className="text-[28px] leading-9 font-semibold tracking-tight">{title}</div>
+        <div className="flex items-center gap-3">
+          <div className="text-[28px] leading-9 font-semibold tracking-tight">{title}</div>
+          {badge}
+        </div>
         <div className="text-[15px] text-muted-foreground">{description}</div>
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}

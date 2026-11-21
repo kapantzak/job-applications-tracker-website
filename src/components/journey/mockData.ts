@@ -83,6 +83,9 @@ export const newApplication: { company: string; role: string; applied: string } 
   applied: 'Mar 3',
 };
 
+/** Step 3 jumps ahead in time, so the list already holds applications from the weeks since step 2. */
+export const applyTimeCue = 'A few weeks later';
+
 /**
  * Applications tracked before step 3, newest first. With `newApplication` they are the 12 the
  * Dashboard counts. Applied dates are absent for Saved.

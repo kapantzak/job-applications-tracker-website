@@ -2,7 +2,7 @@ import { act, render, screen, waitFor, within } from '@testing-library/react';
 import { motionValue } from 'motion/react';
 import { describe, expect, test } from 'vitest';
 import { AppWindow } from '../../src/components/journey/AppWindow';
-import { dashboard, jobs, proposal } from '../../src/components/journey/mockData';
+import { applyTimeCue, dashboard, jobs, proposal } from '../../src/components/journey/mockData';
 import { ApplyScreen } from '../../src/components/journey/screens/ApplyScreen';
 import { DashboardScreen } from '../../src/components/journey/screens/DashboardScreen';
 import { SCREENS } from '../../src/components/journey/screens';
@@ -39,6 +39,14 @@ describe('ApplyScreen', () => {
     const row = chosenRow();
     expect(within(row).getByText('Saved')).toBeVisible();
     expect(within(row).getByText('Applied')).not.toBeVisible();
+  });
+
+  test('the time cue appears at the start and stays to the final state', () => {
+    const { unmount } = render(<ApplyScreen progress={motionValue(0)} />);
+    expect(screen.getByText(applyTimeCue)).not.toBeVisible();
+    unmount();
+    render(<ApplyScreen progress={motionValue(1)} />);
+    expect(screen.getByText(applyTimeCue)).toBeVisible();
   });
 
   test('follows progress both ways', async () => {

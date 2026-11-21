@@ -1,15 +1,25 @@
-import { CheckIcon, ChevronDownIcon, ListFilterIcon, MailIcon, PlusIcon, SearchIcon } from 'lucide-react';
+import { CalendarClockIcon, CheckIcon, ChevronDownIcon, ListFilterIcon, MailIcon, PlusIcon, SearchIcon } from 'lucide-react';
 import { easeInOut, motion, useTransform, type MotionValue } from 'motion/react';
 import type { ReactNode } from 'react';
-import { applications, newApplication, STATUS_LABEL } from '../mockData';
+import { applications, applyTimeCue, newApplication, STATUS_LABEL } from '../mockData';
 import { segment } from '../timeline';
 import type { AppStatus, ScreenProps } from '../types';
-import { easeSoft, MockButton, MockPageHeader, MockPointer, STATUS_FILL, usePhase, useVisibility } from '../ui';
+import {
+  easeSoft,
+  MockButton,
+  MockPageHeader,
+  MockPointer,
+  Reveal,
+  STATUS_FILL,
+  usePhase,
+  useVisibility,
+} from '../ui';
 
-// Phases within the step: 0–0.25 the pointer opens the status menu, 0.25–0.42 it picks Applied,
+// Phases within the step: 0–0.1 the "A few weeks later" cue appears and stays, 0–0.25 the pointer opens the status menu, 0.25–0.42 it picks Applied,
 // 0.42–0.54 the menu closes, the value and date roll over and the pointer leaves, 0.56–0.87 the
 // lifted row drops into the list as the others make room, 0.8–0.98 a soft highlight fades on it.
 const PHASE = {
+  cue: [0.01, 0.1],
   pointerIn: [0.02, 0.17],
   openPress: [0.15, 0.22],
   menu: [0.2, 0.245],
@@ -38,11 +48,21 @@ const COLUMNS = 'grid grid-cols-[176px_minmax(0,1fr)_150px_80px] items-center ga
 
 /** Step 3: the saved job's status goes Saved → Applied and it drops into the Applications list. */
 export function ApplyScreen({ progress }: ScreenProps) {
+  const cue = usePhase(progress, ...PHASE.cue);
   return (
     <div className="flex h-full flex-col">
       <MockPageHeader
         title="Applications"
         description="Every application you are tracking."
+        badge={
+          <Reveal t={cue} x={-8} pop className="flex">
+            {/* A story cue, not app UI: the info badge's colours, a size up so it reads on phones. */}
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-status-applied/15 px-3 py-1 text-[15px] leading-5 font-semibold whitespace-nowrap text-status-interview dark:text-status-offer">
+              <CalendarClockIcon className="size-4" />
+              {applyTimeCue}
+            </span>
+          </Reveal>
+        }
         actions={
           <>
             <MockButton variant="outline">
