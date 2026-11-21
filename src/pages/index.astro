@@ -1,7 +1,42 @@
 ---
 import Base from '../layouts/Base.astro';
+import ClaudeCode from '../components/ClaudeCode.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Install from '../components/Install.astro';
+import Trust from '../components/Trust.astro';
+import { journeySteps, meta, sections } from '../content/site';
 ---
 
-<Base title="Job Applications Tracker" description="Placeholder description.">
-  <main></main>
+<Base title={meta.title} description={meta.description}>
+  <Header />
+  <main>
+    <Hero />
+
+    <!-- Static step list until Task 7 adds the Journey island. -->
+    <section id="journey" aria-labelledby="journey-title" class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+      <h2 id="journey-title" class="text-3xl font-bold tracking-tight sm:text-4xl">{sections.journey.title}</h2>
+      <ol class="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {
+          journeySteps.map((step, i) => (
+            <li class="rounded-xl border border-border bg-card p-6 text-card-foreground">
+              <p class="text-sm font-medium text-muted-foreground">Step {i + 1}</p>
+              <h3 class="mt-1 text-lg font-semibold tracking-tight">{step.title}</h3>
+              <p class="mt-2 text-muted-foreground">{step.line}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <Trust />
+    <ClaudeCode />
+
+    <!-- Task 8 adds the demo video. -->
+    <section id="video"></section>
+
+    <Install />
+  </main>
+  <Footer />
 </Base>
