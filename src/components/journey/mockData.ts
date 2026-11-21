@@ -86,11 +86,22 @@ export const newApplication: { company: string; role: string; applied: string } 
 /** Step 3 jumps ahead in time, so the list already holds applications from the weeks since step 2. */
 export const applyTimeCue = 'A few weeks later';
 
+/** The steps of the Dashboard's Journey graph, in order (the app's FUNNEL_STAGES). */
+export type FunnelStage = 'applied' | 'screening' | 'interview' | 'offer';
+export const FUNNEL_STAGES: readonly FunnelStage[] = ['applied', 'screening', 'interview', 'offer'];
+
 /**
  * Applications tracked before step 3, newest first. With `newApplication` they are the 12 the
- * Dashboard counts. Applied dates are absent for Saved.
+ * Dashboard counts. Applied dates are absent for Saved. `reached` stands in for the app's status
+ * history: the furthest step a stopped application got to, when its status does not show it.
  */
-export const applications: { company: string; role: string; status: AppStatus; applied: string | null }[] = [
+export const applications: {
+  company: string;
+  role: string;
+  status: AppStatus;
+  applied: string | null;
+  reached?: FunnelStage;
+}[] = [
   { company: 'Juniper Ferry', role: 'Frontend Engineer, Design Systems', status: 'applied', applied: 'Mar 1' },
   { company: 'Mossgate Labs', role: 'Senior Frontend Engineer', status: 'screening', applied: 'Feb 27' },
   { company: 'Copperline Health', role: 'Staff UI Engineer', status: 'interview', applied: 'Feb 20' },
@@ -100,7 +111,7 @@ export const applications: { company: string; role: string; status: AppStatus; a
   { company: 'Tallpine Games', role: 'Senior Frontend Engineer', status: 'applied', applied: 'Feb 3' },
   { company: 'Orrery Maps', role: 'UI Engineer', status: 'no-response', applied: 'Jan 22' },
   { company: 'Bramble Pay', role: 'Senior React Engineer', status: 'applied', applied: 'Jan 19' },
-  { company: 'Saltglass Studio', role: 'Frontend Engineer', status: 'rejected', applied: 'Jan 14' },
+  { company: 'Saltglass Studio', role: 'Frontend Engineer', status: 'rejected', applied: 'Jan 14', reached: 'screening' },
   { company: 'Wrenfield Data', role: 'Senior Frontend Engineer', status: 'screening', applied: 'Jan 9' },
 ];
 
@@ -139,28 +150,66 @@ export const STATUS_LABEL: Record<AppStatus, string> = {
   'no-response': 'No response',
 };
 
-const STATUS_ORDER = Object.keys(STATUS_LABEL) as AppStatus[];
-
 // The Dashboard step follows the accepted proposal: the applied job is now at its proposed status.
-const dashboardStatuses: AppStatus[] = [...applications.map((a) => a.status), proposal.toStatus];
-const statusCount = (status: AppStatus) => dashboardStatuses.filter((s) => s === status).length;
+const dashboardApps: { status: AppStatus; reached?: FunnelStage }[] = [...applications, { status: proposal.toStatus }];
+const statusCount = (status: AppStatus) => dashboardApps.filter((a) => a.status === status).length;
+
+/** How applications that stopped at a step ended there; `waiting` is any other status. */
+export type JourneyStop = 'waiting' | 'rejected' | 'noResponse' | 'withdrawn';
+export const JOURNEY_STOPS: readonly JourneyStop[] = ['waiting', 'rejected', 'noResponse', 'withdrawn'];
+const STOP_OF: Partial<Record<AppStatus, JourneyStop>> = {
+  rejected: 'rejected',
+  'no-response': 'noResponse',
+  withdrawn: 'withdrawn',
+};
+
+// The app's funnel depth: 1..4 for Applied..Offer; Rejected and No response only show that an
+// application was sent, and Withdrawn alone shows nothing, so `reached` must say more.
+function rank(status: AppStatus | FunnelStage): number {
+  const i = FUNNEL_STAGES.indexOf(status as FunnelStage);
+  if (i >= 0) return i + 1;
+  return status === 'rejected' || status === 'no-response' ? 1 : 0;
+}
+
+function journeyStages(): JourneyStage[] {
+  const counts = FUNNEL_STAGES.map(() => 0);
+  const stops = FUNNEL_STAGES.map(() => ({ waiting: 0, rejected: 0, noResponse: 0, withdrawn: 0 }));
+  for (const a of dashboardApps) {
+    const reach = Math.max(rank(a.status), a.reached ? rank(a.reached) : 0);
+    for (let i = 0; i < reach; i++) counts[i] += 1;
+    if (reach > 0) stops[reach - 1][STOP_OF[a.status] ?? 'waiting'] += 1;
+  }
+  return FUNNEL_STAGES.map((stage, i) => ({
+    stage,
+    count: counts[i],
+    share: i > 0 && counts[i - 1] > 0 ? Math.round((counts[i] / counts[i - 1]) * 100) : null,
+    stops: stops[i],
+  }));
+}
+
+export interface JourneyStage {
+  stage: FunnelStage;
+  /** Applications that reached this step. */
+  count: number;
+  /** Percent of the step before, rounded; null for Applied. */
+  share: number | null;
+  /** Applications whose furthest step is this one, by how they stopped. */
+  stops: Record<JourneyStop, number>;
+}
 
 /** Proposals left after the Review step accepted the only one; drives the sidebar badge there. */
 export const dashboardReviewCount = 0;
 
 /**
- * The Dashboard as the app computes it: tiles and status bar count the statuses above; the funnel
- * counts how far each sent application got (Saltglass Studio was rejected after screening, the
- * applied job went from Applied to Interview, so it reached Screening as well).
+ * The Dashboard as the app computes it: tiles count the statuses above; the journey counts how far
+ * each sent application got and how it stopped there (Saltglass Studio was rejected after
+ * screening; the applied job went from Applied to Interview, so it reached Screening as well).
  */
 export const dashboard: {
-  total: number;
   tiles: { label: string; value: number }[];
-  statusBar: { status: AppStatus; count: number }[];
-  funnel: { stage: 'applied' | 'screening' | 'interview' | 'offer'; count: number; rejected: number }[];
+  journey: { sent: number; saved: number; stages: JourneyStage[] };
   attention: { company: string; role: string; note: string }[];
 } = {
-  total: dashboardStatuses.length,
   tiles: [
     { label: 'In progress', value: statusCount('applied') + statusCount('screening') + statusCount('interview') },
     { label: 'Interviews', value: statusCount('interview') },
@@ -168,13 +217,10 @@ export const dashboard: {
     { label: 'Rejected', value: statusCount('rejected') },
     { label: 'To review', value: dashboardReviewCount },
   ],
-  statusBar: STATUS_ORDER.map((status) => ({ status, count: statusCount(status) })),
-  funnel: [
-    { stage: 'applied', count: 11, rejected: 1 },
-    { stage: 'screening', count: 6, rejected: 1 },
-    { stage: 'interview', count: 3, rejected: 0 },
-    { stage: 'offer', count: 1, rejected: 0 },
-  ],
+  journey: (() => {
+    const stages = journeyStages();
+    return { sent: stages[0].count, saved: statusCount('saved'), stages };
+  })(),
   // Applied, screening or interview applications with no change in 14 days, as of the proposal's day.
   attention: [
     { company: 'Bramble Pay', role: 'Senior React Engineer', note: 'Applied 52 days ago, no reply' },

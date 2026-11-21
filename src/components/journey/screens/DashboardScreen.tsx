@@ -9,26 +9,22 @@ import {
   TrendingUpIcon,
 } from 'lucide-react';
 import { easeInOut, easeOut, motion, useMotionTemplate, useTransform, type MotionValue } from 'motion/react';
-import type { ReactNode } from 'react';
-import { dashboard, STATUS_LABEL } from '../mockData';
-import { MockButton, MockPageHeader, Reveal, STATUS_FILL, usePhase } from '../ui';
+import { useId, type ReactNode } from 'react';
+import { segment } from '../timeline';
+import { dashboard, JOURNEY_STOPS, STATUS_LABEL, type FunnelStage, type JourneyStage, type JourneyStop } from '../mockData';
+import { MockButton, MockPageHeader, Reveal, usePhase, useVisibility } from '../ui';
 import type { ScreenProps } from '../types';
 
-// Phases within the step: 0.04–0.54 the tiles count up one after another, 0.22–0.6 the status bar
-// fills left to right while its legend appears, 0.5–0.9 the funnel bars grow step by step, and
-// 0.62–0.94 the needs-attention list fills in. Nothing moves after 0.95.
+// Phases within the step: 0.04–0.54 the tiles count up one after another; 0.14–0.84 the journey
+// graph is uncovered left to right, easing into each stage in turn, and every label fades in as
+// the flow reaches it (the final "1 offer" last); 0.82–0.95 the needs-attention list starts to
+// fill in below. Nothing moves after 0.95.
 const TILE_START = 0.04;
 const TILE_STEP = 0.05;
 const TILE_DURATION = 0.3;
-const BAR = [0.22, 0.6] as const;
-const LEGEND_START = 0.3;
-const LEGEND_STEP = 0.035;
-const FUNNEL_START = 0.5;
-const FUNNEL_STEP = 0.06;
-const FUNNEL_DURATION = 0.2;
-const FOOTNOTES = [0.82, 0.92] as const;
-const ATTENTION_START = 0.62;
-const ATTENTION_STEP = 0.06;
+const GRAPH_KNOTS = [0.14, 0.32, 0.5, 0.68, 0.84];
+const ATTENTION_START = 0.82;
+const ATTENTION_STEP = 0.03;
 
 const TILE_ICON: Record<string, ReactNode> = {
   'In progress': <TrendingUpIcon className="size-4" />,
@@ -39,19 +35,7 @@ const TILE_ICON: Record<string, ReactNode> = {
   'To review': <InboxIcon className="size-4" />,
 };
 
-// Completes "Rejected after …" for each funnel step (the app's AFTER_STEP).
-const AFTER_STEP: Record<(typeof dashboard.funnel)[number]['stage'], string> = {
-  applied: 'applying',
-  screening: 'screening',
-  interview: 'the interview',
-  offer: 'the offer',
-};
-
-const shownSegments = dashboard.statusBar.filter((s) => s.count > 0);
-const funnelTop = dashboard.funnel[0]?.count ?? 0;
-const rejections = dashboard.funnel.filter((f) => f.rejected > 0);
-
-/** Step 5: the Dashboard counts up, the status bar and the funnel fill in. */
+/** Step 5: the Dashboard counts up and the journey graph flows from Applied to Offer. */
 export function DashboardScreen({ progress }: ScreenProps) {
   return (
     <div className="flex h-full flex-col">
@@ -60,7 +44,7 @@ export function DashboardScreen({ progress }: ScreenProps) {
         description="How this profile's applications are doing."
         actions={<HeaderActions />}
       />
-      <div className="mb-4 grid grid-cols-5 gap-3">
+      <div className="mb-4 grid shrink-0 grid-cols-5 gap-3">
         {dashboard.tiles.map((tile, i) => (
           <Tile
             key={tile.label}
@@ -72,11 +56,8 @@ export function DashboardScreen({ progress }: ScreenProps) {
           />
         ))}
       </div>
-      <StatusBarCard progress={progress} />
-      <div className="mt-4 grid grid-cols-[1.4fr_1fr] gap-4">
-        <FunnelCard progress={progress} />
-        <AttentionCard progress={progress} />
-      </div>
+      <JourneyCard progress={progress} />
+      <AttentionCard progress={progress} />
     </div>
   );
 }
@@ -101,10 +82,23 @@ function HeaderActions() {
   );
 }
 
-function Card({ title, className = '', children }: { title: ReactNode; className?: string; children: ReactNode }) {
+function Card({
+  title,
+  description,
+  className = '',
+  children,
+}: {
+  title: ReactNode;
+  description?: ReactNode;
+  className?: string;
+  children: ReactNode;
+}) {
   return (
-    <div className={`rounded-xl border border-border bg-card px-5 py-4 text-card-foreground shadow-sm ${className}`}>
-      <div className="mb-3.5 text-[16px] font-semibold">{title}</div>
+    <div className={`shrink-0 rounded-xl border border-border bg-card px-5 py-4 text-card-foreground shadow-sm ${className}`}>
+      <div className="mb-3 space-y-0.5">
+        <div className="text-[17px] leading-6 font-semibold">{title}</div>
+        {description && <div className="text-[14px] text-muted-foreground">{description}</div>}
+      </div>
       {children}
     </div>
   );
@@ -136,118 +130,254 @@ function Tile({
   );
 }
 
-function StatusBarCard({ progress }: { progress: MotionValue<number> }) {
-  const fill = usePhase(progress, ...BAR);
-  const hidden = useTransform(fill, (v) => (1 - easeInOut(v)) * 100);
-  const clipPath = useMotionTemplate`inset(0 ${hidden}% 0 0)`;
+// --- Journey graph -------------------------------------------------------------------------------
+// A simplified copy of the app's JourneyCard (src/ui/components/dashboard/JourneyCard.tsx, v0.3.0):
+// stage bars sized by count, ribbons to the next stage, and the stops branching off below each
+// stage. Geometry is in viewBox units, equal to px in the 1040 px window; text is larger than the
+// app's so it stays readable when the window is scaled down.
+const VIEW_W = 722;
+const TOP = 40; // top of the bars; stage names and counts sit above
+const TRUNK_H = 120; // height of the Applied bar
+const MIN_H = 3;
+const NODE_W = 14;
+const NODE_X0 = 26;
+const NODE_GAP = 176;
+const EXIT_DX = 100;
+const LAST_EXIT_DX = 72;
+const EXIT_DROP = 22; // first exit's drop below the point it leaves
+const EXIT_STEP = 14; // extra drop per following exit, so labels never collide
+const CAP_W = 4;
+const LABEL_GAP = 7;
+const PAD_BOTTOM = 2;
+const FADE = 40; // how far past an element the flow travels while it fades in
+const EDGE = 28; // soft leading edge of the uncovered flow
+
+type Exit = JourneyStop;
+
+interface ExitShape {
+  exit: Exit;
+  count: number;
+  y: number;
+  h: number;
+  capX: number;
+  capY: number;
+}
+
+interface StageShape extends JourneyStage {
+  x: number;
+  nodeH: number;
+  moved: number; // ribbon height to the next stage, 0 when none moved on
+  exits: ExitShape[];
+}
+
+function layout(stages: JourneyStage[]): { shapes: StageShape[]; height: number } {
+  const scale = stages[0].count > 0 ? TRUNK_H / stages[0].count : 0;
+  const size = (n: number) => (n > 0 ? Math.max(MIN_H, n * scale) : 0);
+  let bottom = TOP;
+  const shapes = stages.map((s, i) => {
+    const x = NODE_X0 + i * NODE_GAP;
+    const moved = size(stages[i + 1]?.count ?? 0);
+    const capX = x + NODE_W + (i === stages.length - 1 ? LAST_EXIT_DX : EXIT_DX);
+    let y = TOP + moved;
+    let drop = EXIT_DROP;
+    const exits: ExitShape[] = [];
+    for (const exit of JOURNEY_STOPS) {
+      const count = s.stops[exit];
+      if (count <= 0) continue;
+      const h = size(count);
+      exits.push({ exit, count, y, h, capX, capY: y + drop });
+      bottom = Math.max(bottom, y + drop + Math.max(h, h / 2 + 8));
+      y += h;
+      drop += EXIT_STEP;
+    }
+    const nodeH = s.count > 0 ? Math.max(size(s.count), y - TOP) : 0;
+    bottom = Math.max(bottom, TOP + nodeH);
+    return { ...s, x, nodeH, moved, exits };
+  });
+  return { shapes, height: Math.ceil(bottom + PAD_BOTTOM) };
+}
+
+const { shapes, height: VIEW_H } = layout(dashboard.journey.stages);
+
+// Status colours as the app's STATUS_COLOR_VAR; waiting takes its stage's colour, held back.
+const STAGE_COLOR: Record<FunnelStage, string> = {
+  applied: 'var(--status-applied)',
+  screening: 'var(--status-screening)',
+  interview: 'var(--status-interview)',
+  offer: 'var(--status-offer)',
+};
+const STOP_COLOR: Record<Exit, string | null> = {
+  waiting: null,
+  rejected: 'var(--status-rejected)',
+  noResponse: 'var(--status-no-response)',
+  withdrawn: 'var(--status-withdrawn)',
+};
+const WAITING_ALPHA = 0.6;
+const STOP_WORD: Record<Exit, string> = {
+  waiting: 'waiting',
+  rejected: STATUS_LABEL.rejected.toLowerCase(),
+  noResponse: STATUS_LABEL['no-response'].toLowerCase(),
+  withdrawn: STATUS_LABEL.withdrawn.toLowerCase(),
+};
+
+const exitColor = (s: StageShape, exit: Exit) => STOP_COLOR[exit] ?? STAGE_COLOR[s.stage];
+// At the last step, still waiting means holding the offer.
+const isOffer = (s: StageShape, exit: Exit) => s.stage === 'offer' && exit === 'waiting';
+const exitLabel = (s: StageShape, e: ExitShape) =>
+  isOffer(s, e.exit) ? `${e.count} ${e.count === 1 ? 'offer' : 'offers'}` : `${e.count} ${STOP_WORD[e.exit]}`;
+
+const round = (n: number) => Math.round(n * 100) / 100;
+
+function ribbon(x0: number, top0: number, bottom0: number, x1: number, top1: number, bottom1: number): string {
+  const m = round((x0 + x1) / 2);
+  const [a, b, c, d, e, f] = [x0, top0, bottom0, x1, top1, bottom1].map(round);
+  return `M${a},${b} C${m},${b} ${m},${e} ${d},${e} L${d},${f} C${m},${f} ${m},${c} ${a},${c} Z`;
+}
+
+const { sent, saved } = dashboard.journey;
+const caption = saved > 0 ? `${sent} sent · ${saved} saved, not applied yet` : `${sent} sent`;
+
+function JourneyCard({ progress }: { progress: MotionValue<number> }) {
+  // How far, in viewBox units, the flow has travelled; it eases into each stage in turn and ends
+  // past the right edge, so the soft edge leaves the drawing whole.
+  const reach = useTransform(
+    progress,
+    GRAPH_KNOTS,
+    [0, ...shapes.slice(1).map((s) => s.x), VIEW_W + EDGE],
+    { ease: easeInOut },
+  );
+  const solid = useTransform(reach, (v) => ((v - EDGE) / VIEW_W) * 100);
+  const clear = useTransform(reach, (v) => (v / VIEW_W) * 100);
+  const maskImage = useMotionTemplate`linear-gradient(to right, #000 ${solid}%, transparent ${clear}%)`;
+  const visibility = useVisibility(reach);
+  const viewBox = `0 0 ${VIEW_W} ${VIEW_H}`;
   return (
-    <Card title={`Where your ${dashboard.total} applications stand`}>
-      <div className="relative h-3.5 overflow-hidden rounded bg-muted">
-        <motion.div className="absolute inset-0 flex gap-0.5" style={{ clipPath }}>
-          {shownSegments.map((s, i) => (
-            <span
-              key={s.status}
-              className={`block h-full basis-0 ${STATUS_FILL[s.status]} ${i === 0 ? 'rounded-l' : ''} ${
-                i === shownSegments.length - 1 ? 'rounded-r' : ''
-              }`}
-              style={{ flexGrow: s.count }}
-            />
-          ))}
+    <Card title="Your applications' journey" description={caption}>
+      <div data-journey className="relative">
+        <motion.div style={{ maskImage, visibility }}>
+          <FlowDrawing viewBox={viewBox} />
         </motion.div>
-      </div>
-      {/* Every status is listed, zeros included, as in the app. */}
-      <div className="mt-3 flex flex-wrap gap-x-3.5 gap-y-1 text-[12px] text-muted-foreground">
-        {dashboard.statusBar.map((s, i) => (
-          <LegendItem key={s.status} progress={progress} start={LEGEND_START + i * LEGEND_STEP}>
-            <span className={`inline-block size-2.5 rounded-sm ${STATUS_FILL[s.status]}`} />
-            {STATUS_LABEL[s.status]} <span className="text-foreground">{s.count}</span>
-          </LegendItem>
-        ))}
+        <svg viewBox={viewBox} className="absolute inset-0 block h-auto w-full overflow-visible">
+          {shapes.map((s) => (
+            <StageLabels key={s.stage} shape={s} reach={reach} />
+          ))}
+        </svg>
       </div>
     </Card>
   );
 }
 
-function LegendItem({ progress, start, children }: { progress: MotionValue<number>; start: number; children: ReactNode }) {
-  const t = usePhase(progress, start, start + 0.1);
+/** The bars and ribbons; static, uncovered by the clip in JourneyCard. */
+function FlowDrawing({ viewBox }: { viewBox: string }) {
+  const uid = useId().replace(/[^\w-]/g, '');
+  const gradient = (key: string) => `${uid}-${key}`;
   return (
-    <Reveal t={t} y={4} className="inline-flex items-center gap-1.5">
-      {children}
-    </Reveal>
+    <svg viewBox={viewBox} className="block h-auto w-full">
+      <defs>
+        {shapes.map((s, i) => {
+          const next = shapes[i + 1];
+          return [
+            next && s.moved > 0 && (
+              <linearGradient key={`${s.stage}-moved`} id={gradient(`${s.stage}-moved`)}>
+                <stop offset="0" style={{ stopColor: STAGE_COLOR[s.stage], stopOpacity: 0.45 }} />
+                <stop offset="1" style={{ stopColor: STAGE_COLOR[next.stage], stopOpacity: 0.45 }} />
+              </linearGradient>
+            ),
+            ...s.exits.map((e) => (
+              <linearGradient key={`${s.stage}-${e.exit}`} id={gradient(`${s.stage}-${e.exit}`)}>
+                <stop offset="0" style={{ stopColor: STAGE_COLOR[s.stage], stopOpacity: 0.35 }} />
+                <stop
+                  offset="1"
+                  style={{ stopColor: exitColor(s, e.exit), stopOpacity: e.exit === 'waiting' ? WAITING_ALPHA : 0.9 }}
+                />
+              </linearGradient>
+            )),
+          ];
+        })}
+      </defs>
+      {shapes.map((s, i) => {
+        const right = s.x + NODE_W;
+        const next = shapes[i + 1];
+        return (
+          <g key={s.stage} data-stage={s.stage}>
+            {next && s.moved > 0 && (
+              <path
+                d={ribbon(right, TOP, TOP + s.moved, next.x, TOP, TOP + s.moved)}
+                fill={`url(#${gradient(`${s.stage}-moved`)})`}
+              />
+            )}
+            {s.exits.map((e) => (
+              <g key={e.exit}>
+                <path
+                  d={ribbon(right, e.y, e.y + e.h, e.capX, e.capY, e.capY + e.h)}
+                  fill={`url(#${gradient(`${s.stage}-${e.exit}`)})`}
+                />
+                <rect
+                  x={e.capX}
+                  y={round(e.capY)}
+                  width={CAP_W}
+                  height={round(e.h)}
+                  rx={CAP_W / 2}
+                  style={{ fill: exitColor(s, e.exit), fillOpacity: e.exit === 'waiting' ? WAITING_ALPHA : 1 }}
+                />
+              </g>
+            ))}
+            {s.nodeH > 0 && (
+              <rect x={s.x} y={TOP} width={NODE_W} height={round(s.nodeH)} rx={4} style={{ fill: STAGE_COLOR[s.stage] }} />
+            )}
+          </g>
+        );
+      })}
+    </svg>
   );
 }
 
-function FunnelCard({ progress }: { progress: MotionValue<number> }) {
-  const footnotes = usePhase(progress, ...FOOTNOTES);
+/** A stage's name and count, and its stop labels, each fading in as the flow reaches it. */
+function StageLabels({ shape: s, reach }: { shape: StageShape; reach: MotionValue<number> }) {
+  const center = s.x + NODE_W / 2;
   return (
-    <Card title="How far applications get">
-      <div className="flex flex-col gap-2 text-[14px]">
-        {dashboard.funnel.map((step, i) => (
-          <FunnelRow
-            key={step.stage}
-            step={step}
-            above={i > 0 ? dashboard.funnel[i - 1].count : null}
-            progress={progress}
-            start={FUNNEL_START + i * FUNNEL_STEP}
-          />
-        ))}
-      </div>
-      <Reveal t={footnotes} y={4} className="mt-3 space-y-1 text-[12px] text-muted-foreground">
-        <p>% = share of the step above</p>
-        {rejections.length > 0 && (
-          <p className="flex items-center gap-1.5">
-            <span className="inline-block size-2 shrink-0 rounded-full bg-status-rejected" />
-            Rejected after: {rejections.map((f) => `${AFTER_STEP[f.stage]} ${f.rejected}`).join(' · ')}
-          </p>
-        )}
-      </Reveal>
-    </Card>
+    <g data-stage-labels={s.stage}>
+      <FadeIn reach={reach} at={s.x}>
+        <text x={center} y={TOP - 23} textAnchor="middle" fontSize={15} fontWeight={700} fill="currentColor">
+          {STATUS_LABEL[s.stage]}
+        </text>
+        <text x={center} y={TOP - 7} textAnchor="middle" fontSize={13} className="fill-muted-foreground">
+          {s.share === null ? `${s.count}` : `${s.count} · ${s.share}%`}
+        </text>
+      </FadeIn>
+      {s.exits.map((e) => {
+        const offer = isOffer(s, e.exit);
+        return (
+          <FadeIn key={e.exit} reach={reach} at={e.capX}>
+            <text
+              data-exit={e.exit}
+              x={e.capX + CAP_W + LABEL_GAP}
+              y={round(e.capY + e.h / 2 + 5)}
+              fontSize={14}
+              fontWeight={offer ? 700 : undefined}
+              // The offer colour is light in dark mode and dark in light mode, so it stays readable.
+              style={{ fill: offer ? STAGE_COLOR.offer : 'currentColor' }}
+            >
+              {exitLabel(s, e)}
+            </text>
+          </FadeIn>
+        );
+      })}
+    </g>
   );
 }
 
-function FunnelRow({
-  step,
-  above,
-  progress,
-  start,
-}: {
-  step: (typeof dashboard.funnel)[number];
-  above: number | null;
-  progress: MotionValue<number>;
-  start: number;
-}) {
-  const grow = usePhase(progress, start, start + FUNNEL_DURATION);
-  const hidden = useTransform(grow, (v) => (1 - easeInOut(v)) * 100);
-  const clipPath = useMotionTemplate`inset(0 ${hidden}% 0 0)`;
-  const label = usePhase(progress, start + FUNNEL_DURATION * 0.5, start + FUNNEL_DURATION);
-  const pct = (n: number) => `${funnelTop > 0 ? (n / funnelTop) * 100 : 0}%`;
-  const reached = step.count - step.rejected;
-  const share = above ? Math.round((step.count / above) * 100) : null;
-  return (
-    <div className="grid grid-cols-[80px_1fr_68px] items-center gap-3">
-      <span>{STATUS_LABEL[step.stage]}</span>
-      <span className="block h-4 overflow-hidden rounded bg-muted">
-        <motion.span
-          className={`flex h-full ${step.rejected > 0 && reached > 0 ? 'gap-0.5' : ''}`}
-          style={{ clipPath }}
-        >
-          <span className="block h-full rounded bg-status-interview" style={{ width: pct(reached) }} />
-          {step.rejected > 0 && (
-            <span className="block h-full rounded bg-status-rejected" style={{ width: pct(step.rejected) }} />
-          )}
-        </motion.span>
-      </span>
-      <Reveal t={label} x={-6} className="flex items-baseline justify-end gap-1.5">
-        <span>{step.count}</span>
-        {share !== null && <span className="text-[12px] text-muted-foreground">{share}%</span>}
-      </Reveal>
-    </div>
-  );
+function FadeIn({ reach, at, children }: { reach: MotionValue<number>; at: number; children: ReactNode }) {
+  const opacity = useTransform(reach, (v) => segment(v, at, at + FADE));
+  const visibility = useVisibility(opacity);
+  return <motion.g style={{ opacity, visibility }}>{children}</motion.g>;
 }
+
+// --- Needs attention -----------------------------------------------------------------------------
 
 function AttentionCard({ progress }: { progress: MotionValue<number> }) {
   return (
-    <Card title="Needs attention">
+    <Card title="Needs attention" className="mt-4">
       <div className="flex flex-col divide-y divide-border text-[14px]">
         {dashboard.attention.map((item, i) => (
           <AttentionItem key={item.company} progress={progress} start={ATTENTION_START + i * ATTENTION_STEP}>
@@ -263,7 +393,7 @@ function AttentionCard({ progress }: { progress: MotionValue<number> }) {
 }
 
 function AttentionItem({ progress, start, children }: { progress: MotionValue<number>; start: number; children: ReactNode }) {
-  const t = usePhase(progress, start, start + 0.12);
+  const t = usePhase(progress, start, start + 0.07);
   return (
     <Reveal t={t} x={-8} className="flex flex-col py-1.5 first:pt-0">
       {children}

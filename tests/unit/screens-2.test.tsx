@@ -78,6 +78,14 @@ describe('ReviewScreen', () => {
 });
 
 describe('DashboardScreen', () => {
+  const STAGE_TEXT = [
+    ['Applied', '11'],
+    ['Screening', '6 · 55%'],
+    ['Interview', '3 · 50%'],
+    ['Offer', '1 · 33%'],
+  ];
+  const BRANCHES = ['3 waiting', '1 rejected', '1 no response', '2 waiting', '1 offer'];
+
   test('at 1 every tile shows its final number', () => {
     render(<DashboardScreen progress={motionValue(1)} />);
     for (const { label, value } of dashboard.tiles) {
@@ -85,21 +93,60 @@ describe('DashboardScreen', () => {
     }
   });
 
-  test('at 0 every tile shows 0', () => {
+  test('at 1 the journey graph shows every stage, share and branch', () => {
+    render(<DashboardScreen progress={motionValue(1)} />);
+    expect(screen.getByText("Your applications' journey")).toBeVisible();
+    expect(screen.getByText('11 sent · 1 saved, not applied yet')).toBeVisible();
+    for (const [name, count] of STAGE_TEXT) {
+      expect(screen.getByText(name)).toBeVisible();
+      expect(screen.getByText(count)).toBeVisible();
+    }
+    for (const label of BRANCHES) {
+      for (const el of screen.getAllByText(label)) expect(el).toBeVisible();
+    }
+    // Two stages leave applications waiting; zero-count branches are not drawn.
+    expect(screen.getAllByText('2 waiting')).toHaveLength(2);
+    expect(screen.queryByText(/withdrawn/)).toBeNull();
+    expect(screen.getByText('Needs attention')).toBeVisible();
+  });
+
+  test('at 0 every tile shows 0 and the graph is not shown', () => {
     render(<DashboardScreen progress={motionValue(0)} />);
     for (const { label } of dashboard.tiles) {
       expect(within(tile(label)).getByText('0')).toBeVisible();
     }
+    expect(document.querySelector('[data-journey] > div')).not.toBeVisible();
+    for (const [name, count] of STAGE_TEXT) {
+      expect(screen.getByText(name)).not.toBeVisible();
+      expect(screen.getByText(count)).not.toBeVisible();
+    }
+    for (const label of BRANCHES) {
+      for (const el of screen.getAllByText(label)) expect(el).not.toBeVisible();
+    }
   });
 
-  test('counts follow progress both ways', async () => {
+  test('the flow reaches each stage before the next, and "1 offer" comes last', async () => {
+    const progress = motionValue(0.4);
+    render(<DashboardScreen progress={progress} />);
+    expect(screen.getByText('3 waiting')).toBeVisible();
+    expect(screen.getByText('Offer')).not.toBeVisible();
+    act(() => progress.set(0.7));
+    await waitFor(() => expect(screen.getByText('Interview')).toBeVisible());
+    expect(screen.getByText('1 offer')).not.toBeVisible();
+  });
+
+  test('counts and graph follow progress both ways', async () => {
     const progress = motionValue(0);
     render(<DashboardScreen progress={progress} />);
     const { label, value } = dashboard.tiles.find((t) => t.value > 0)!;
+    const offer = screen.getByText('1 offer');
     act(() => progress.set(1));
     await waitFor(() => expect(tile(label)).toHaveTextContent(String(value)));
+    await waitFor(() => expect(offer).toBeVisible());
     act(() => progress.set(0));
     await waitFor(() => expect(within(tile(label)).getByText('0')).toBeVisible());
+    await waitFor(() => expect(offer).not.toBeVisible());
+    expect(screen.getByText('Applied')).not.toBeVisible();
   });
 });
 

@@ -3,6 +3,7 @@ import {
   applications,
   dashboard,
   dashboardReviewCount,
+  JOURNEY_STOPS,
   jobs,
   newApplication,
   proposal,
@@ -10,6 +11,7 @@ import {
   STATUS_LABEL,
   VERIFICATION_LABEL,
 } from '../../src/components/journey/mockData';
+import type { JourneyStop } from '../../src/components/journey/mockData';
 import type { AppStatus } from '../../src/components/journey/types';
 
 const ALLOWED_COMPANIES = [
@@ -86,41 +88,57 @@ describe('dashboard', () => {
   // applied job, which is now at the proposal's status.
   const statuses: AppStatus[] = [...applications.map((a) => a.status), proposal.toStatus];
   const count = (s: AppStatus) => statuses.filter((x) => x === s).length;
-  const bar = Object.fromEntries(dashboard.statusBar.map((s) => [s.status, s.count]));
   const tile = (label: string) => dashboard.tiles.find((t) => t.label === label)?.value;
-  const funnel = Object.fromEntries(dashboard.funnel.map((f) => [f.stage, f]));
+  const { journey } = dashboard;
+  const stage = Object.fromEntries(journey.stages.map((s) => [s.stage, s]));
+  const stopTotal = (stop: JourneyStop) => journey.stages.reduce((n, s) => n + s.stops[stop], 0);
 
-  it('status bar lists every status once and counts the applications', () => {
-    expect(dashboard.statusBar.map((s) => s.status).sort()).toEqual(Object.keys(STATUS_LABEL).sort());
-    for (const s of Object.keys(STATUS_LABEL) as AppStatus[]) expect(bar[s]).toBe(count(s));
-    expect(dashboard.total).toBe(statuses.length);
-    expect(dashboard.statusBar.reduce((n, s) => n + s.count, 0)).toBe(dashboard.total);
-  });
-
-  it('tiles are the app tiles and agree with the status bar', () => {
+  it('tiles are the app tiles and count the statuses', () => {
     expect(dashboard.tiles.map((t) => t.label)).toEqual(['In progress', 'Interviews', 'Offers', 'Rejected', 'To review']);
-    expect(tile('In progress')).toBe(bar.applied + bar.screening + bar.interview);
-    expect(tile('Interviews')).toBe(bar.interview);
-    expect(tile('Offers')).toBe(bar.offer);
-    expect(tile('Rejected')).toBe(bar.rejected);
+    expect(tile('In progress')).toBe(count('applied') + count('screening') + count('interview'));
+    expect(tile('Interviews')).toBe(count('interview'));
+    expect(tile('Offers')).toBe(count('offer'));
+    expect(tile('Rejected')).toBe(count('rejected'));
     // The only proposal was accepted on the Review step.
     expect(tile('To review')).toBe(dashboardReviewCount);
     expect(dashboardReviewCount).toBe(0);
   });
 
-  it('funnel runs Applied -> Offer, never grows and matches the statuses', () => {
-    expect(dashboard.funnel.map((f) => f.stage)).toEqual(['applied', 'screening', 'interview', 'offer']);
-    for (let i = 1; i < dashboard.funnel.length; i++) {
-      expect(dashboard.funnel[i].count).toBeLessThanOrEqual(dashboard.funnel[i - 1].count);
-    }
-    // Everything except Saved and Withdrawn was sent.
-    expect(funnel.applied.count).toBe(dashboard.total - bar.saved - bar.withdrawn);
-    // Applications still at a step reached it; rejections are counted at the step they reached.
-    expect(funnel.screening.count).toBeGreaterThanOrEqual(bar.screening + bar.interview + bar.offer);
-    expect(funnel.interview.count).toBeGreaterThanOrEqual(bar.interview + bar.offer);
-    expect(funnel.offer.count).toBe(bar.offer);
-    expect(dashboard.funnel.reduce((n, f) => n + f.rejected, 0)).toBe(bar.rejected);
-    for (const f of dashboard.funnel) expect(f.rejected).toBeLessThanOrEqual(f.count);
+  it('journey runs Applied -> Offer with the expected counts and shares', () => {
+    expect(journey.stages.map((s) => s.stage)).toEqual(['applied', 'screening', 'interview', 'offer']);
+    expect(journey.stages.map((s) => [s.count, s.share])).toEqual([
+      [11, null],
+      [6, 55],
+      [3, 50],
+      [1, 33],
+    ]);
+    expect(stage.applied.stops).toEqual({ waiting: 3, rejected: 1, noResponse: 1, withdrawn: 0 });
+    expect(stage.screening.stops).toEqual({ waiting: 2, rejected: 1, noResponse: 0, withdrawn: 0 });
+    expect(stage.interview.stops).toEqual({ waiting: 2, rejected: 0, noResponse: 0, withdrawn: 0 });
+    expect(stage.offer.stops).toEqual({ waiting: 1, rejected: 0, noResponse: 0, withdrawn: 0 });
+    expect(journey.saved).toBe(1);
+  });
+
+  it('journey conserves applications at every stage: in = continuing + stops', () => {
+    journey.stages.forEach((s, i) => {
+      const continuing = journey.stages[i + 1]?.count ?? 0;
+      const stopped = JOURNEY_STOPS.reduce((n, stop) => n + s.stops[stop], 0);
+      expect(s.count).toBe(continuing + stopped);
+    });
+    // Everything except Saved was sent (nothing is withdrawn), and every sent application stops once.
+    expect(journey.sent).toBe(stage.applied.count);
+    expect(journey.sent + journey.saved).toBe(statuses.length);
+    expect(JOURNEY_STOPS.reduce((n, stop) => n + stopTotal(stop), 0)).toBe(journey.sent);
+  });
+
+  it('journey agrees with the tiles', () => {
+    // Waiting before Offer is what is in progress; waiting at Offer holds the offers.
+    expect(stopTotal('waiting') - stage.offer.stops.waiting).toBe(tile('In progress'));
+    expect(stage.interview.stops.waiting).toBe(tile('Interviews'));
+    expect(stage.offer.count).toBe(tile('Offers'));
+    expect(stopTotal('rejected')).toBe(tile('Rejected'));
+    expect(stopTotal('noResponse')).toBe(count('no-response'));
+    expect(stopTotal('withdrawn')).toBe(count('withdrawn'));
   });
 
   it('applications are distinct and do not yet include the applied job', () => {
