@@ -7,13 +7,13 @@ Date: 2026-11-21
 
 A static promotional site for [job-applications-tracker](https://github.com/kapantzak/job-applications-tracker) (the "app"), deployed on Vercel.
 
-- **Audience:** developers who already use Claude Code.
+- **Audience:** developers who already use an AI coding agent (Claude Code, Codex or their own). Amended 2026-11-21 (decision 14): the site is agent-neutral; Claude Code is named as the default agent.
 - **Goal:** the visitor installs the app (`npx job-applications-tracker`).
 - **Centrepiece:** a "journey" that explains simply how the app works, built as a mocked app UI with polished animations (not screenshots).
 
 Why this audience matters to the content: Claude Code is the app's default agent. With it installed, the app skips agent Setup (app README, "First run" step 2). Gmail sync uses the claude.ai Gmail connector, which the user connects once in their claude.ai account (README, "Gmail access for other agents"). The first start also asks where to keep data (README, "First run" step 1).
 
-For this visitor, the pitch is **"no agent setup"** (decision 11). It is not "zero setup", which would overclaim.
+For this visitor, the pitch is **"no agent setup"** (decision 11). It is not "zero setup", which would overclaim. Since decision 14 it is qualified: "no agent setup with Claude Code", because Codex and custom commands are chosen in Setup and need their own Gmail MCP server.
 
 ## Goals
 
@@ -88,6 +88,21 @@ For this visitor, the pitch is **"no agent setup"** (decision 11). It is not "ze
 13. Count clicks on the install-command copy buttons as a Web Analytics custom event, for example `track('copy_install', { location: 'hero' | 'install' })`.
     - Before building it, the builder confirms in Vercel's docs that the Pro plan includes custom events. If it does not, stop and ask the user.
 
+### Copy review decisions (2026-11-21)
+
+14. Agent-neutral copy (supersedes the Claude-Code-only wording of decision 11).
+    - The headline says "the AI agent you already use"; Claude Code, Codex and custom commands are named where it matters.
+    - Claims that hold only for Claude Code are labelled as such ("no agent setup with Claude Code"; Gmail via the claude.ai connector for Claude Code, a Gmail MCP server for other agents; the spend cap is Claude Code only).
+    - Journey step 2 becomes "Your agent finds jobs, the app checks every link". The page title and OG image drop "with Claude Code".
+15. The Claude Code section becomes "Works with your agent": run `npx`; pick your agent (Claude Code is used automatically, Codex or a custom command in Setup); optionally connect Gmail (claude.ai connector for Claude Code, a Gmail MCP server for others).
+16. Accuracy fixes, reworded agent-neutrally: meta description; step 1 ("The app reads the text of your CV and your agent suggests…"); FAQ "the links of the 200 newest jobs you already have"; keep the FAQ sentence about content reaching the agent's model.
+17. Keep all 16 invented company names, including Umbrella Health (the app's own sample data).
+18. Journey: a small "A few weeks later" cue in the mock at step 3, so the existing applications list makes sense after a brand-new profile.
+19. Narrow-screen autoplay also stops when the visitor focuses or touches anything in the journey.
+20. Focus indicator: a solid, full-strength ring on `:focus-visible`.
+21. Accept that narrow screens with scripts blocked (not disabled) show only step 1's line.
+22. Vercel: turn the Vercel Toolbar off for this project; use a Protection Bypass for Automation secret locally (never committed) to test previews; pin `engines.node` to `24.x`.
+
 ## Page structure
 
 ```
@@ -95,7 +110,7 @@ Header       logo · GitHub link
 Hero         headline · one-line subhead · copyable `npx job-applications-tracker` · "View on GitHub"
 Journey      the animated mocked app (five steps)
 Why trust it data stored locally (SQLite) · your own agent · nothing changes until you accept · never applies or sends mail
-Claude Code  no agent setup: uses the Claude Code you have · ready in two steps: `npx`, then (optional) connect Gmail in claude.ai
+Your agent   works with your agent: `npx` · pick your agent (Claude Code automatic; Codex/custom in Setup) · (optional) Gmail
 Demo video   real recording, poster first, loads on scroll
 Install      `npx` and `npm i -g` + `jobtrack` · requirements (Node 22+) · short FAQ
 Footer       GitHub · npm · MIT licence
