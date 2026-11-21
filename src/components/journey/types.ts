@@ -8,4 +8,13 @@ export interface ScreenProps {
 }
 export type Verification = 'verified' | 'redirected' | 'could-not-verify';
 export type Fit = 'match' | 'mismatch' | 'unknown';
-export type AppStatus = 'saved' | 'applied' | 'screening' | 'interview' | 'offer' | 'rejected';
+// The app's application statuses, in its order (APPLICATION_STATUSES); ids use the CSS token spelling.
+export type AppStatus =
+  | 'saved'
+  | 'applied'
+  | 'screening'
+  | 'interview'
+  | 'offer'
+  | 'rejected'
+  | 'withdrawn'
+  | 'no-response';

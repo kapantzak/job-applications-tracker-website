@@ -18,6 +18,7 @@ import { backOut, cubicBezier, motion, useTransform, type MotionValue } from 'mo
 import type { CSSProperties, ReactNode } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { segment } from './timeline';
+import type { AppStatus } from './types';
 
 /** Soft ease-out used for most entrances. */
 export const easeSoft = cubicBezier(0.22, 1, 0.36, 1);
@@ -62,16 +63,17 @@ export function Reveal({ t, x = 0, y = 0, scale = 1, pop = false, className, sty
   );
 }
 
-export type BadgeTone = 'success' | 'warning' | 'muted' | 'destructive' | 'info';
+export type BadgeTone = 'success' | 'warning' | 'muted' | 'destructive' | 'info' | 'primary';
 
 // Tones follow the app's badge variants (src/ui/components/ui/badge.tsx); `info` is a soft blue
-// from the app's status ramp.
+// from the app's status ramp, `primary` the app's default variant (its Interview badge).
 const BADGE_TONES: Record<BadgeTone, string> = {
   success: 'bg-success text-success-foreground',
   warning: 'bg-warning text-warning-foreground',
   muted: 'bg-secondary text-secondary-foreground',
   destructive: 'bg-destructive text-white dark:bg-destructive/60',
   info: 'bg-status-applied/15 text-status-interview dark:text-status-offer',
+  primary: 'bg-primary text-primary-foreground',
 };
 
 export function MockBadge({ tone, children }: { tone: BadgeTone; children: ReactNode }) {
@@ -83,6 +85,20 @@ export function MockBadge({ tone, children }: { tone: BadgeTone; children: React
     </span>
   );
 }
+
+/**
+ * Status fills from the app's dashboard (status-colors.ts); full class names so Tailwind finds them.
+ */
+export const STATUS_FILL: Record<AppStatus, string> = {
+  saved: 'bg-status-saved',
+  applied: 'bg-status-applied',
+  screening: 'bg-status-screening',
+  interview: 'bg-status-interview',
+  offer: 'bg-status-offer',
+  rejected: 'bg-status-rejected',
+  withdrawn: 'bg-status-withdrawn',
+  'no-response': 'bg-status-no-response',
+};
 
 export type ButtonVariant = 'primary' | 'outline';
 

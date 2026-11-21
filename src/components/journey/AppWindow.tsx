@@ -20,11 +20,11 @@ const NAV_GAP = 2;
 // The single proposal the Review step accepts.
 const REVIEW_PENDING = 1;
 
-const NAV: { label: string; icon: LucideIcon; badge?: number }[] = [
+const NAV: { label: string; icon: LucideIcon; counts?: 'review' }[] = [
   { label: 'Dashboard', icon: LayoutDashboardIcon },
   { label: 'Jobs', icon: BriefcaseIcon },
   { label: 'Applications', icon: FileTextIcon },
-  { label: 'Review', icon: InboxIcon, badge: REVIEW_PENDING },
+  { label: 'Review', icon: InboxIcon, counts: 'review' },
   { label: 'Runs', icon: HistoryIcon },
   { label: 'Profile', icon: UserIcon },
 ];
@@ -44,7 +44,16 @@ const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : us
  * The app's window (title bar, sidebar, main area) at a fixed design size, scaled to fit its container.
  * Plain divs only: the mock is decorative and must not add landmarks or focus stops to the page.
  */
-export function AppWindow({ active, children }: { active: StepId; children: ReactNode }) {
+export function AppWindow({
+  active,
+  reviewCount = REVIEW_PENDING,
+  children,
+}: {
+  active: StepId;
+  /** Proposals waiting on the Review page, shown as the sidebar badge; hidden at 0. */
+  reviewCount?: number;
+  children: ReactNode;
+}) {
   const boxRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number | null>(null);
 
@@ -97,8 +106,13 @@ export function AppWindow({ active, children }: { active: StepId; children: Reac
                   transform: `translateY(${activeIndex * (NAV_ITEM_HEIGHT + NAV_GAP)}px)`,
                 }}
               />
-              {NAV.map((item, i) => (
-                <NavItem key={item.label} {...item} current={i === activeIndex} />
+              {NAV.map(({ counts, ...item }, i) => (
+                <NavItem
+                  key={item.label}
+                  {...item}
+                  badge={counts === 'review' && reviewCount > 0 ? reviewCount : undefined}
+                  current={i === activeIndex}
+                />
               ))}
             </div>
             <div className="mt-5">
@@ -137,7 +151,10 @@ function NavItem({
       <Icon className="size-[18px] shrink-0" strokeWidth={current ? 2.25 : 2} />
       <span className="flex-1 truncate">{label}</span>
       {badge !== undefined && (
-        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[12px] font-semibold text-white">
+        <span
+          data-review-count
+          className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[12px] font-semibold text-white"
+        >
           {badge}
         </span>
       )}
