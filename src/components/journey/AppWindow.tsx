@@ -170,7 +170,7 @@ function TitleBar() {
         <span className="size-3 rounded-full bg-[#febc2e]" />
         <span className="size-3 rounded-full bg-[#28c840]" />
       </div>
-      <div className="absolute left-1/2 flex h-6 w-[300px] -translate-x-1/2 items-center justify-center rounded-md bg-muted text-[13px] text-muted-foreground">
+      <div className="absolute left-1/2 flex h-6 w-[300px] -translate-x-1/2 items-center justify-center rounded-md bg-muted text-[13px] text-foreground/75">
         127.0.0.1:4173
       </div>
     </div>
