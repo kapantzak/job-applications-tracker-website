@@ -12,7 +12,8 @@
     "astro": "astro",
     "check": "astro check",
     "test": "vitest run",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "og": "node scripts/og/render.mjs"
   },
   "dependencies": {
     "@astrojs/react": "^7.1.9",
