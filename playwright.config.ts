@@ -3,9 +3,22 @@ import { defineConfig, devices } from '@playwright/test';
 // When PLAYWRIGHT_BASE_URL is set, tests run against that deployment and no local server starts.
 const externalBaseURL = process.env.PLAYWRIGHT_BASE_URL;
 
+// Lets automated runs through Vercel preview protection; the secret is only sent as a header.
+const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET;
+
 export default defineConfig({
   testDir: 'tests/e2e',
-  use: { baseURL: externalBaseURL ?? 'http://localhost:4321' },
+  use: {
+    baseURL: externalBaseURL ?? 'http://localhost:4321',
+    ...(bypassSecret
+      ? {
+          extraHTTPHeaders: {
+            'x-vercel-protection-bypass': bypassSecret,
+            'x-vercel-set-bypass-cookie': 'true',
+          },
+        }
+      : {}),
+  },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   ...(externalBaseURL
     ? {}

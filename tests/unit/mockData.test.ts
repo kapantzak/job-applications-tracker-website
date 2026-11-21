@@ -19,6 +19,16 @@ const ALLOWED_COMPANIES = [
   'Brightwell Cloud',
   'Larkspur Systems',
   'Quillmark Software',
+  'Juniper Ferry',
+  'Mossgate Labs',
+  'Copperline Health',
+  'Driftwood Atlas',
+  'Harbor & Finch',
+  'Tallpine Games',
+  'Orrery Maps',
+  'Bramble Pay',
+  'Saltglass Studio',
+  'Wrenfield Data',
 ];
 
 describe('mockData', () => {
@@ -36,8 +46,18 @@ describe('mockData', () => {
 
   it('has 6 jobs, all from invented companies', () => {
     expect(jobs).toHaveLength(6);
-    for (const j of jobs) expect(ALLOWED_COMPANIES).toContain(j.company);
-    expect(ALLOWED_COMPANIES).toContain(proposal.company);
+  });
+
+  it('shows only allow-listed companies, and the allow-list is exactly the names used', () => {
+    const used = new Set([
+      ...jobs.map((j) => j.company),
+      ...applications.map((a) => a.company),
+      ...dashboard.attention.map((a) => a.company),
+      proposal.company,
+      newApplication.company,
+    ]);
+    for (const c of used) expect(ALLOWED_COMPANIES).toContain(c);
+    for (const c of ALLOWED_COMPANIES) expect(used).toContain(c);
   });
 
   it('proposal refers to a job in the list (Applied -> Interview)', () => {

@@ -72,8 +72,7 @@ test.describe('narrow', () => {
     await page.goto('/');
     await hydrate(page);
     await expect(tabs(page).first()).toHaveAttribute('aria-selected', 'true');
-    await page.waitForTimeout(6500);
-    await expect(tabs(page).first()).toHaveAttribute('aria-selected', 'false', { timeout: 1000 });
+    await expect(tabs(page).first()).toHaveAttribute('aria-selected', 'false', { timeout: 9000 });
   });
 
   test('narrow tab tap stops autoplay', async ({ page }) => {

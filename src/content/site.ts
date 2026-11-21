@@ -24,7 +24,7 @@ export const LINKS: { github: string; npm: string; readme: string; license: stri
 export const meta: { title: string; description: string } = {
   title: 'Job Applications Tracker: find and track jobs with Claude Code',
   description:
-    'A local app that uses the Claude Code you already have to find job postings, check every link, track your applications and propose status changes from Gmail.',
+    'A local app that has the Claude Code you already have find job postings, then checks every link itself, tracks your applications and proposes status changes from Gmail.',
 };
 
 export const hero: { headline: string; subhead: string } = {
@@ -77,7 +77,7 @@ export const trustPoints: { title: string; body: string }[] = [
   },
   {
     title: 'It never applies or sends mail',
-    body: 'The app never applies to jobs, sends mail, or changes your labels or messages. For Gmail sync, Claude Code is allowed only the search and read tools.',
+    body: 'The app never applies to jobs, sends mail, or changes your labels or messages. For Gmail sync, Claude Code is by default allowed only the search and read tools.',
   },
 ];
 
@@ -159,7 +159,7 @@ export const faq: { q: string; a: string }[] = [
   },
   {
     q: 'Where does my data live?',
-    a: 'In ~/.job-applications-tracker/ unless you choose another folder on the first start. It holds data.db (SQLite), your CVs and the run logs. Change it later with jobtrack config set data-dir <path>.',
+    a: 'In ~/.job-applications-tracker/ unless you choose another folder on the first start. It holds data.db (SQLite), your CVs and the run logs. Change it later with jobtrack config set data-dir <path>, or npx job-applications-tracker config set data-dir <path> if you run it with npx.',
   },
   {
     q: 'Does it work on my phone?',
@@ -167,7 +167,7 @@ export const faq: { q: string; a: string }[] = [
   },
   {
     q: 'What does it cost?',
-    a: 'The app is MIT-licensed. Searches and syncs run on your Claude Code plan, and each run’s page shows what it used. A Max-effort search uses several times the tokens of a normal one, so it asks before it starts.',
+    a: 'The app is MIT-licensed. Searches and syncs run on your Claude Code plan, and each job search’s Run page shows what it used. A Max-effort search uses several times the tokens of a normal one, so it asks before it starts.',
   },
   {
     q: 'What do I need?',

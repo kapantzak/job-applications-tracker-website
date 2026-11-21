@@ -9,7 +9,7 @@ interface Props {
 
 const { title, description } = Astro.props;
 const canonical = new URL('/', Astro.site);
-// og.png is produced in a later task; absolute URL is required by crawlers.
+// Crawlers require an absolute URL for the OG image.
 const ogImage = new URL('/og.png', Astro.site);
 ---
 
