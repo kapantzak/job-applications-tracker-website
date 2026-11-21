@@ -63,23 +63,6 @@ test.describe('desktop', () => {
     expect(await stepAtViewportCentre(page)).toBe('dashboard');
     await expect(mock(page)).toHaveAttribute('data-active-screen', 'dashboard');
   });
-
-  test('no layout shift', async ({ page }) => {
-    await page.addInitScript(() => {
-      const w = window as unknown as { __cls: number };
-      w.__cls = 0;
-      new PerformanceObserver((list) => {
-        for (const entry of list.getEntries() as unknown as { value: number; hadRecentInput: boolean }[]) {
-          if (!entry.hadRecentInput) w.__cls += entry.value;
-        }
-      }).observe({ type: 'layout-shift', buffered: true });
-    });
-    await page.goto('/');
-    await page.waitForLoadState('load');
-    await page.waitForTimeout(1000);
-    const cls = await page.evaluate(() => (window as unknown as { __cls: number }).__cls);
-    expect(cls).toBeLessThan(0.1);
-  });
 });
 
 test.describe('narrow', () => {
@@ -113,6 +96,29 @@ test.describe('narrow', () => {
     await expect(mock(page)).toHaveAttribute('data-active-screen', 'cv');
   });
 });
+
+for (const viewport of [DESKTOP, NARROW]) {
+  test(`no layout shift across hydration at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    // Registered before any page script, so shifts from the island's hydration are counted.
+    await page.addInitScript(() => {
+      const w = window as unknown as { __cls: number };
+      w.__cls = 0;
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as unknown as { value: number; hadRecentInput: boolean }[]) {
+          if (!entry.hadRecentInput) w.__cls += entry.value;
+        }
+      }).observe({ type: 'layout-shift', buffered: true });
+    });
+    await page.goto('/');
+    await page.waitForLoadState('load');
+    // Scrolling moves content without producing layout-shift entries; it only triggers client:visible.
+    await hydrate(page);
+    await page.waitForTimeout(1000);
+    const cls = await page.evaluate(() => (window as unknown as { __cls: number }).__cls);
+    expect(cls).toBeLessThan(0.1);
+  });
+}
 
 test('crossing the breakpoint', async ({ page }) => {
   await page.setViewportSize(DESKTOP);
