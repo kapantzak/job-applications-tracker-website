@@ -31,9 +31,9 @@ test('no horizontal scroll at 390px', async ({ page }) => {
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
-test('page has the trust, claude-code and install sections', async ({ page }) => {
+test('page has the trust, agents and install sections', async ({ page }) => {
   await page.goto('/');
-  for (const id of ['trust', 'claude-code', 'install']) {
+  for (const id of ['trust', 'agents', 'install']) {
     await expect(page.locator(`section#${id}`)).toHaveCount(1);
   }
 });

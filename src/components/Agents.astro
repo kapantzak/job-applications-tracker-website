@@ -1,19 +1,20 @@
 ---
-import { claudeCode } from '../content/site';
+import { agents } from '../content/site';
 import CopyCommand from './CopyCommand';
 ---
 
-<section id="claude-code" aria-labelledby="claude-code-title" class="border-y border-border bg-muted/40">
+<section id="agents" aria-labelledby="agents-title" class="border-y border-border bg-muted/40">
   <div class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
     <div class="max-w-2xl">
-      <h2 id="claude-code-title" class="text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-        {claudeCode.title}
+      <h2 id="agents-title" class="text-3xl font-bold tracking-tight text-balance sm:text-4xl">
+        {agents.title}
       </h2>
-      <p class="mt-4 text-lg text-muted-foreground">{claudeCode.intro}</p>
+      <p class="mt-4 text-lg text-muted-foreground">{agents.intro}</p>
     </div>
-    <ol class="mt-10 grid gap-4 md:grid-cols-2">
+    {/* The first card is wide enough to keep the install command on one line. */}
+    <ol class="mt-10 grid gap-4 lg:grid-cols-[minmax(25.5rem,1.3fr)_1fr_1fr]">
       {
-        claudeCode.steps.map((step, i) => (
+        agents.steps.map((step, i) => (
           <li class="flex flex-col rounded-xl border border-border bg-card p-6 text-card-foreground">
             <div class="flex items-center gap-3">
               <span

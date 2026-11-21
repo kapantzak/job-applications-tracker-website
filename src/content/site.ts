@@ -1,5 +1,5 @@
-// All page copy, commands and links. Every factual claim must trace to the app README at the
-// pinned commit and describe npm 0.2.0; tests/unit/copy-guard.test.ts enforces the banned phrases.
+// All page copy, commands and links. Every factual claim must trace to the app README of npm
+// 0.2.0 (tag v0.2.0) and describe that version; tests/unit/copy-guard.test.ts enforces the banned phrases.
 
 export type StepId = 'cv' | 'jobs' | 'apply' | 'review' | 'dashboard';
 export interface JourneyStep {
@@ -22,28 +22,28 @@ export const LINKS: { github: string; npm: string; readme: string; license: stri
 };
 
 export const meta: { title: string; description: string } = {
-  title: 'Job Applications Tracker: find and track jobs with Claude Code',
+  title: 'Job Applications Tracker: find and track jobs with your AI agent',
   description:
-    'A local app that has the Claude Code you already have find job postings, then checks every link itself, tracks your applications and proposes status changes from Gmail.',
+    'A local app that uses the AI agent you already have to find job postings. It checks every link itself, tracks your applications and turns Gmail replies into status changes you accept.',
 };
 
 export const hero: { headline: string; subhead: string } = {
-  // Non-breaking space keeps the product name on one line.
-  headline: 'Find jobs and track your applications with the Claude\u00a0Code you already use',
+  // Non-breaking spaces keep "AI agent" together and stop "use" from wrapping alone.
+  headline: 'Find jobs and track your applications with the AI\u00a0agent you already\u00a0use',
   subhead:
-    'A local app that has your agent search for postings that match your profile, checks every link itself, and turns Gmail replies into status changes you accept. No agent setup.',
+    'A local app that has your agent search for postings that match your profile, checks every link itself, and turns Gmail replies into status changes you accept. No agent setup with Claude Code.',
 };
 
 export const journeySteps: JourneyStep[] = [
   {
     id: 'cv',
     title: 'Drop your CV, get a profile',
-    line: 'Your agent reads the text of your CV and suggests target roles, locations, remote preference and seniority.',
+    line: 'The app reads the text of your CV and your agent suggests target roles, locations, remote preference and seniority.',
   },
   {
     id: 'jobs',
-    title: 'Claude Code finds jobs, the app checks every link',
-    line: 'Claude Code searches the web for matching postings; the app checks every link itself and shows how each job fits.',
+    title: 'Your agent finds jobs, the app checks every link',
+    line: 'Your agent searches the web for matching postings; the app checks every link itself and shows how each job fits.',
   },
   {
     id: 'apply',
@@ -69,7 +69,7 @@ export const trustPoints: { title: string; body: string }[] = [
   },
   {
     title: 'Your own agent',
-    body: 'The app runs the Claude Code you already use, with your sign-in and your plan. Your profile, the text of your CV and the mail it reads go to that agent, like any other prompt you give it.',
+    body: 'The app runs the agent CLI you already use: Claude Code by default, or Codex or a custom command. Your profile, the text of your CV and the mail it reads go to that agent, like any other prompt you give it.',
   },
   {
     title: 'Nothing changes until you accept',
@@ -77,18 +77,17 @@ export const trustPoints: { title: string; body: string }[] = [
   },
   {
     title: 'It never applies or sends mail',
-    body: 'The app never applies to jobs, sends mail, or changes your labels or messages. For Gmail sync, Claude Code is by default allowed only the search and read tools.',
+    body: 'The app never applies to jobs, sends mail, or changes your labels or messages. For Gmail sync, Claude Code is by default allowed only the search and read tools; Codex gets whatever access its own Gmail MCP server allows, and is told to only read.',
   },
 ];
 
-export const claudeCode: {
+export const agents: {
   title: string;
   intro: string;
   steps: { title: string; body: string; command?: string }[];
 } = {
-  title: 'No agent setup. Ready in two steps.',
-  intro:
-    'Claude Code is the app’s default agent. With it installed, the app skips agent Setup and opens on your profiles.',
+  title: 'Works with your agent',
+  intro: 'Claude Code is the app’s default agent; Codex and custom commands work too.',
   steps: [
     {
       title: 'Run it',
@@ -96,8 +95,12 @@ export const claudeCode: {
       command: INSTALL_NPX,
     },
     {
-      title: 'Connect Gmail in claude.ai (optional)',
-      body: 'Gmail sync uses the claude.ai Gmail connector. Connect Gmail once in your claude.ai account, and sync can read replies about your applications and propose status changes.',
+      title: 'Pick your agent',
+      body: 'With Claude Code installed, the app uses it and skips Setup. Otherwise Setup opens, where you pick Codex or a custom command. Change it later in Settings → Agent.',
+    },
+    {
+      title: 'Connect Gmail (optional)',
+      body: 'For Claude Code, connect Gmail once in your claude.ai account; sync uses the claude.ai Gmail connector. For Codex or a custom command, set up a Gmail MCP server in that agent yourself.',
     },
   ],
 };
@@ -155,7 +158,7 @@ export const faq: { q: string; a: string }[] = [
   },
   {
     q: 'What does the app send to the agent?',
-    a: 'For a CV analysis, the text read from your CV (not the file). For a job search, your profile fields, including Notes, and the links of jobs you already have. For Gmail sync, the agent searches and reads your mail, so it sees the messages it finds. That content reaches your agent’s model the same way your other prompts do.',
+    a: 'For a CV analysis, the text read from your CV (not the file). For a job search, your profile fields, including Notes, and the links of the 200 newest jobs you already have. For Gmail sync, the agent searches and reads your mail, so it sees the messages it finds. That content reaches your agent’s model the same way your other prompts do.',
   },
   {
     q: 'Where does my data live?',
@@ -167,7 +170,7 @@ export const faq: { q: string; a: string }[] = [
   },
   {
     q: 'What does it cost?',
-    a: 'The app is MIT-licensed. Searches and syncs run on your Claude Code plan, and each job search’s Run page shows what it used. A Max-effort search uses several times the tokens of a normal one, so it asks before it starts.',
+    a: 'The app is MIT-licensed. Searches and syncs run on your agent’s plan (Claude Code or Codex), and each job search’s Run page shows what the agent reported it used. A Max-effort search uses several times the tokens of a normal one, so it asks before it starts.',
   },
   {
     q: 'What do I need?',
@@ -183,6 +186,6 @@ function collectStrings(value: unknown, out: string[]): string[] {
 }
 
 export const ALL_COPY: string[] = collectStrings(
-  [INSTALL_NPX, INSTALL_GLOBAL, RUN_GLOBAL, meta, hero, journeySteps, trustPoints, claudeCode, sections, faq],
+  [INSTALL_NPX, INSTALL_GLOBAL, RUN_GLOBAL, meta, hero, journeySteps, trustPoints, agents, sections, faq],
   [],
 );

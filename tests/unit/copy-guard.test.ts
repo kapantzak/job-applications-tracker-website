@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ALL_COPY, INSTALL_NPX, claudeCode, faq, journeySteps } from '../../src/content/site';
+import { ALL_COPY, INSTALL_NPX, agents, faq, hero, journeySteps, meta } from '../../src/content/site';
 
 // Global Constraints: phrases that overclaim privacy or imply auto-apply.
 const BANNED = [
@@ -33,11 +33,29 @@ describe('site copy', () => {
     expect(faq.some((item) => item.a.includes('Node 22'))).toBe(true);
   });
 
-  test('two-step Claude Code section', () => {
-    expect(claudeCode.steps.length).toBe(2);
-    expect(claudeCode.steps[0].command).toBe(INSTALL_NPX);
-    const second = `${claudeCode.steps[1].title} ${claudeCode.steps[1].body}`;
-    expect(second).toContain('Gmail');
-    expect(second).toContain('claude.ai');
+  test('three-step agent section', () => {
+    expect(agents.steps.length).toBe(3);
+    expect(agents.steps[0].command).toBe(INSTALL_NPX);
+    const texts = agents.steps.map((step) => `${step.title} ${step.body}`);
+    expect(texts.some((text) => text.includes('Codex'))).toBe(true);
+    const gmail = texts.find((text) => text.includes('Gmail'));
+    expect(gmail).toContain('claude.ai');
+    expect(gmail).toContain('MCP');
+  });
+
+  // Decision 14: the pitch is agent-neutral; "no agent setup" holds only for Claude Code.
+  test('headline, title and description are agent-neutral', () => {
+    for (const text of [hero.headline, meta.title, meta.description]) {
+      expect(text).not.toContain('Claude');
+    }
+    expect(hero.headline.replace(/\u00a0/g, ' ')).toContain('the AI agent you already use');
+  });
+
+  test('"no agent setup" is always scoped to Claude Code', () => {
+    for (const text of ALL_COPY) {
+      for (const match of text.matchAll(/no agent setup/gi)) {
+        expect(text.slice(match.index), `"${text}"`).toMatch(/^no agent setup with Claude Code/i);
+      }
+    }
   });
 });
