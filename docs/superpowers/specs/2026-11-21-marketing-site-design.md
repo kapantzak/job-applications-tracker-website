@@ -114,17 +114,22 @@ For this visitor, the pitch is **"no agent setup"** (decision 11). It is not "ze
 29. Replace the demo video and poster with the 0.3.0 recording (app commit 052f050).
 30. Step 5 line: "The Dashboard counts what is in progress, shows how far applications get and where they stopped, and lists what needs your attention."
 
+### npm link and author credit (2026-11-21)
+
+31. The hero shows a second button, "npm" with an external-link icon, beside "View on GitHub", linking to the npm package page. It shows no version: a build-time "latest" version label was tried and dropped at the user's request.
+32. The footer credits the author's website next to the brand: "Made by kapantzakis.gr", linking to https://kapantzakis.gr.
+
 ## Page structure
 
 ```
 Header       logo · GitHub link
-Hero         headline · one-line subhead · copyable `npx job-applications-tracker` · "View on GitHub"
+Hero         headline · one-line subhead · copyable `npx job-applications-tracker` · "View on GitHub" · "npm"
 Journey      the animated mocked app (five steps)
 Why trust it data stored locally (SQLite) · your own agent · nothing changes until you accept · never applies or sends mail
 Your agent   works with your agent: `npx` · pick your agent (Claude Code automatic; Codex/custom in Setup) · (optional) Gmail
 Demo video   real recording, poster first, loads on scroll
 Install      `npx` and `npm i -g` + `jobtrack` · requirements (Node 22+) · short FAQ
-Footer       GitHub · npm · MIT licence
+Footer       "Made by kapantzakis.gr" · GitHub · npm · MIT licence
 ```
 
 - The FAQ covers: other agents (Codex, a custom command); what is sent to the agent; where data lives (`~/.job-applications-tracker/`); desktop browsers only; cost (it uses your Claude Code plan; Max effort uses more).

@@ -14,11 +14,12 @@ export const RUN_GLOBAL = 'jobtrack';
 
 const REPO = 'https://github.com/kapantzak/job-applications-tracker';
 
-export const LINKS: { github: string; npm: string; readme: string; license: string } = {
+export const LINKS: { github: string; npm: string; readme: string; license: string; website: string } = {
   github: REPO,
   npm: 'https://www.npmjs.com/package/job-applications-tracker',
   readme: `${REPO}#readme`,
   license: `${REPO}/blob/main/LICENSE`,
+  website: 'https://kapantzakis.gr',
 };
 
 export const meta: { title: string; description: string } = {
@@ -120,8 +121,8 @@ export const sections: {
   };
   faq: { title: string };
   header: { github: string };
-  hero: { github: string; requirements: string };
-  footer: { github: string; npm: string; readme: string; license: string };
+  hero: { github: string; npm: string; requirements: string };
+  footer: { github: string; npm: string; readme: string; license: string; madeBy: string; website: string };
 } = {
   brand: 'Job Applications Tracker',
   journey: { title: 'How it works', tabsLabel: 'Journey steps', stepLabel: 'Step' },
@@ -147,8 +148,15 @@ export const sections: {
   },
   faq: { title: 'Questions' },
   header: { github: 'GitHub' },
-  hero: { github: 'View on GitHub', requirements: 'Requires Node 22 or newer.' },
-  footer: { github: 'GitHub', npm: 'npm', readme: 'Documentation', license: 'MIT licence' },
+  hero: { github: 'View on GitHub', npm: 'npm', requirements: 'Requires Node 22 or newer.' },
+  footer: {
+    github: 'GitHub',
+    npm: 'npm',
+    readme: 'Documentation',
+    license: 'MIT licence',
+    madeBy: 'Made by',
+    website: 'kapantzakis.gr',
+  },
 };
 
 export const faq: { q: string; a: string }[] = [
