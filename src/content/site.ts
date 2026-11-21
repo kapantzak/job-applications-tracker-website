@@ -106,7 +106,7 @@ export const sections: {
   brand: string;
   journey: { title: string; tabsLabel: string; stepLabel: string };
   trust: { title: string; intro: string };
-  video: { title: string; caption: string; fallback: string };
+  video: { title: string; label: string; caption: string; fallback: string };
   install: {
     title: string;
     intro: string;
@@ -128,6 +128,7 @@ export const sections: {
   },
   video: {
     title: 'Watch a walk-through',
+    label: 'Job Applications Tracker walk-through, with captions and no sound',
     caption:
       'About a minute and a half, with captions and no sound. It uses invented data and a stand-in agent.',
     fallback: 'Your browser cannot play this video.',

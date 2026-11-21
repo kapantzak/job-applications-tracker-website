@@ -3,11 +3,17 @@ import { expect, test } from '@playwright/test';
 test('demo video is lazy, muted, has controls and reserves its box', async ({ page }) => {
   const requested: string[] = [];
   page.on('request', (req) => requested.push(new URL(req.url()).pathname));
+  const posterResponse = page.waitForResponse((r) => new URL(r.url()).pathname === '/media/demo-poster.png');
   await page.goto('/');
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
   await page.waitForLoadState('networkidle');
 
+  const poster = await posterResponse;
+  expect(poster.status()).toBe(200);
+  expect(poster.headers()['content-type']).toBe('image/png');
+
   const video = page.locator('#video video');
+  await expect(video).toHaveAttribute('aria-label', /walk-through/);
   await expect(video).toHaveAttribute('preload', 'none');
   await expect(video).toHaveAttribute('poster', '/media/demo-poster.png');
   await expect(video).toHaveAttribute('width', '1440');
