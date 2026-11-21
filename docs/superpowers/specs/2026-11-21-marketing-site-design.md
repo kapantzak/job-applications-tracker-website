@@ -140,7 +140,7 @@ A mocked app window (sidebar plus main area, matching the app's layout) shows on
 | 2 | Claude Code finds jobs, the app checks every link | "Find jobs" pressed → plain-words log lines stream in → jobs table rows appear; each gets a badge (Verified / Redirected / Could not verify) and a Fit column (✓ ✗ ?) |
 | 3 | Mark one applied | A row's status changes Saved → Applied; the Applications list gains a row |
 | 4 | Sync Gmail, review what it found | "Sync from Gmail" → a Review card with evidence (From / Date / Subject / snippet) → Accept → status becomes Interview |
-| 5 | See where everything stands | The Dashboard: tiles count up, the status bar fills, the funnel bars grow |
+| 5 | See where everything stands | The Dashboard (as in 0.3.0, decision 27): tiles count up, then the Journey flow graph grows from Applied to Offer with its branch-offs |
 
 Behaviour:
 
