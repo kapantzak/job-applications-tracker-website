@@ -1,0 +1,29 @@
+---
+import { sections } from '../content/site';
+
+const copy = sections.video;
+---
+
+<section id="video" aria-labelledby="video-title" class="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+  <div class="max-w-2xl">
+    <h2 id="video-title" class="text-3xl font-bold tracking-tight text-balance sm:text-4xl">{copy.title}</h2>
+    <p class="mt-4 text-lg text-muted-foreground">{copy.caption}</p>
+  </div>
+  <div class="mt-10 overflow-hidden rounded-xl border border-border bg-card">
+    <!-- width/height reserve the 16:10 box; preload none keeps the 2 MB file off the initial load. -->
+    <video
+      class="block h-auto w-full"
+      width="1440"
+      height="900"
+      aria-label={copy.label}
+      controls
+      muted
+      playsinline
+      preload="none"
+      poster="/media/demo-poster.png"
+      src="/media/demo.mp4"
+    >
+      {copy.fallback}
+    </video>
+  </div>
+</section>

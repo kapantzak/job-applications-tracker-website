@@ -1,0 +1,32 @@
+---
+import Agents from '../components/Agents.astro';
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Install from '../components/Install.astro';
+import { Journey } from '../components/journey/Journey';
+import Video from '../components/Video.astro';
+import Trust from '../components/Trust.astro';
+import { journeySteps, meta, sections } from '../content/site';
+---
+
+<Base title={meta.title} description={meta.description}>
+  <Header />
+  <main>
+    <Hero />
+
+    <section id="journey" aria-labelledby="journey-title" class="mx-auto w-full max-w-6xl px-4 pt-16 pb-16 sm:px-6 sm:pt-24 lg:px-8 lg:pb-0">
+      <h2 id="journey-title" class="text-3xl font-bold tracking-tight sm:text-4xl">{sections.journey.title}</h2>
+      <Journey steps={journeySteps} client:visible />
+    </section>
+
+    <Trust />
+    <Agents />
+
+    <Video />
+
+    <Install />
+  </main>
+  <Footer />
+</Base>

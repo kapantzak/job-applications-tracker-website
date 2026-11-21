@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face {
+    font-family: 'Manrope';
+    font-weight: 200 800;
+    src: url('../../node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2') format('woff2');
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    width: 1200px; height: 630px; overflow: hidden;
+    background: oklch(1 0 0); color: oklch(0.141 0.005 285.823);
+    font-family: 'Manrope', sans-serif;
+    padding: 72px 80px; display: flex; flex-direction: column; justify-content: space-between;
+    border-top: 10px solid #18181b;
+  }
+  .brand { display: flex; align-items: center; gap: 18px; font-size: 30px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand svg { width: 56px; height: 56px; }
+  h1 { font-size: 66px; line-height: 1.08; font-weight: 800; letter-spacing: -0.03em; max-width: 980px; }
+  .cmd {
+    align-self: flex-start; display: flex; gap: 16px; align-items: center;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 34px;
+    background: oklch(0.967 0.001 286.375); border: 2px solid oklch(0.92 0.004 286.32);
+    border-radius: 16px; padding: 20px 32px;
+  }
+  .cmd span { color: oklch(0.552 0.016 285.938); }
+</style>
+</head>
+<body>
+  <div class="brand">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+      <rect width="32" height="32" rx="7" fill="#18181b"/>
+      <g transform="translate(5.12 5.12) scale(0.68)" fill="none" stroke="#fafafa" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="14" cy="14" r="8.6" stroke-width="2.6"/>
+        <path d="M20.6 20.6 26.6 26.6" stroke-width="3.2"/>
+        <path d="M10.2 14.3 13 17.1 18.1 11.6" stroke-width="2.7"/>
+      </g>
+    </svg>
+    Job Applications Tracker
+  </div>
+  <h1>Find jobs and track your applications with the AI&nbsp;agent you already&nbsp;use</h1>
+  <div class="cmd"><span>$</span> npx job-applications-tracker</div>
+</body>
+</html>
