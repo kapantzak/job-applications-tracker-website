@@ -96,7 +96,7 @@ export const agents: {
     },
     {
       title: 'Pick your agent',
-      body: 'With Claude Code installed, the app uses it and skips Setup. Otherwise Setup opens, where you pick Codex or a custom command. Change it later in Settings → Agent.',
+      body: 'With Claude Code installed, the app uses it and skips Setup. If your chosen agent is not installed, Setup opens, where you pick Claude Code, Codex or a custom command. Change it later in Settings → Agent.',
     },
     {
       title: 'Connect Gmail (optional)',

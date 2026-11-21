@@ -53,7 +53,7 @@ export default function CopyCommand({ command, location }: Props) {
         <span className="select-none text-muted-foreground" aria-hidden="true">
           $
         </span>
-        <code ref={codeRef} className="min-w-0 break-all">
+        <code ref={codeRef} className="min-w-0 break-words">
           {command}
         </code>
         <button
