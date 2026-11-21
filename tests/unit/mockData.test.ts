@@ -5,11 +5,9 @@ const ALLOWED_COMPANIES = [
   'Acme Robotics',
   'Umbrella Health',
   'Northwind Studio',
-  'Globex Labs',
-  'Initech Cloud',
-  'Hooli Systems',
-  'Stark Analytics',
-  'Wayne Logistics',
+  'Brightwell Cloud',
+  'Larkspur Systems',
+  'Quillmark Software',
 ];
 
 describe('mockData', () => {
