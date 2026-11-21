@@ -1,5 +1,5 @@
 // All page copy, commands and links. Every factual claim must trace to the app README of npm
-// 0.2.0 (tag v0.2.0) and describe that version; tests/unit/copy-guard.test.ts enforces the banned phrases.
+// 0.3.0 (tag v0.3.0) and describe that version; tests/unit/copy-guard.test.ts enforces the banned phrases.
 
 export type StepId = 'cv' | 'jobs' | 'apply' | 'review' | 'dashboard';
 export interface JourneyStep {
@@ -58,7 +58,7 @@ export const journeySteps: JourneyStep[] = [
   {
     id: 'dashboard',
     title: 'See where everything stands',
-    line: 'The Dashboard counts what is in progress, shows how far applications get, and lists what needs your attention.',
+    line: 'The Dashboard counts what is in progress, shows how far applications get and where they stopped, and lists what needs your attention.',
   },
 ];
 
@@ -170,7 +170,7 @@ export const faq: { q: string; a: string }[] = [
   },
   {
     q: 'What does it cost?',
-    a: 'The app is MIT-licensed. Searches and syncs run on your agent’s plan (Claude Code or Codex), and each job search’s Run page shows what the agent reported it used. A Max-effort search uses several times the tokens of a normal one, so it asks before it starts.',
+    a: 'The app is MIT-licensed. Searches and syncs run on your agent’s plan (Claude Code or Codex), and each job search’s and Gmail sync’s Run page shows what it used. A Max-effort search uses several times the tokens of a normal one, so it asks before it starts.',
   },
   {
     q: 'What do I need?',
