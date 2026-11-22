@@ -60,7 +60,12 @@ export default function CopyCommand({ command, location }: Props) {
           type="button"
           onClick={copy}
           aria-label="Copy install command"
-          className="ml-auto shrink-0 [@media(scripting:none)]:hidden rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+          className={`ml-auto shrink-0 [@media(scripting:none)]:hidden rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
+            // The hero copy is the page's main action, so only it gets the filled brand button.
+            hero
+              ? 'border-primary bg-primary text-primary-foreground hover:bg-primary/90'
+              : 'border-border text-foreground hover:bg-muted'
+          }`}
         >
           Copy
         </button>
