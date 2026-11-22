@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<!-- Template for covers 2-4. render.mjs fills #headline and #shot; the look matches scripts/og/og.html. -->
+<style>
+  @font-face {
+    font-family: 'Manrope';
+    font-weight: 200 800;
+    src: url('../../node_modules/@fontsource-variable/manrope/files/manrope-latin-wght-normal.woff2') format('woff2');
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    position: relative;
+    width: 1200px; height: 630px; overflow: hidden;
+    background: oklch(1 0 0); color: oklch(0.141 0.005 285.823);
+    font-family: 'Manrope', sans-serif;
+    border-top: 10px solid #18181b;
+  }
+  .text {
+    position: absolute; left: 80px; top: 62px; bottom: 62px; width: 392px;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; }
+  .brand svg { width: 44px; height: 44px; flex: none; }
+  h1 { font-size: 46px; line-height: 1.1; font-weight: 800; letter-spacing: -0.03em; }
+  .cmd {
+    align-self: flex-start; display: flex; gap: 12px; align-items: center;
+    font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 17px; white-space: nowrap;
+    background: oklch(0.967 0.001 286.375); border: 2px solid oklch(0.92 0.004 286.32);
+    border-radius: 12px; padding: 12px 20px;
+  }
+  .cmd span { color: oklch(0.552 0.016 285.938); }
+  /* The window bleeds off the right and bottom edges, so cropped screenshots read as a larger app. */
+  .window {
+    position: absolute; left: 520px; top: 84px; width: 720px; height: 600px;
+    background: #fff; overflow: hidden;
+    border: 2px solid oklch(0.92 0.004 286.32); border-radius: 18px;
+    box-shadow: 0 24px 60px -20px oklch(0.141 0.005 285.823 / 0.28);
+  }
+  .window img { display: block; width: 680px; height: auto; }
+</style>
+</head>
+<body>
+  <div class="text">
+    <div class="brand">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+        <rect width="32" height="32" rx="7" fill="#18181b"/>
+        <g transform="translate(5.12 5.12) scale(0.68)" fill="none" stroke="#fafafa" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="14" cy="14" r="8.6" stroke-width="2.6"/>
+          <path d="M20.6 20.6 26.6 26.6" stroke-width="3.2"/>
+          <path d="M10.2 14.3 13 17.1 18.1 11.6" stroke-width="2.7"/>
+        </g>
+      </svg>
+      <span id="brand"></span>
+    </div>
+    <h1 id="headline"></h1>
+    <div class="cmd"><span>$</span> <code id="cmd"></code></div>
+  </div>
+  <div class="window"><img id="shot" alt="" /></div>
+</body>
+</html>
