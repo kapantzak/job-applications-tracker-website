@@ -4,7 +4,7 @@ Assets for product listings. Not part of the website build.
 
 | File | Spec | What it is |
 |---|---|---|
-| `logo.png` | 500×500 PNG, ≤15 MB | The Lens mark from `public/favicon.svg` on a full-bleed `#18181b` square |
+| `logo.png` | 500×500 PNG, ≤15 MB | The Lens mark from `public/favicon.svg` on a full-bleed `#7c3aed` square |
 | `covers/01-hero.png` | 1200×630 PNG, ≤15 MB | The site's Open Graph image (`scripts/og/og.html`) |
 | `covers/02-jobs.png` | 1200×630 PNG, ≤15 MB | "Your agent finds jobs, the app checks every link" + Jobs screen |
 | `covers/03-review.png` | 1200×630 PNG, ≤15 MB | "Sync Gmail, review what it found" + Review screen |

@@ -82,7 +82,7 @@ export function AppWindow({
       <div
         // Before the first measurement (server render, no JS) CSS computes the same fit from the
         // container width; once measured, the inline transform takes over.
-        className="absolute top-0 left-0 flex origin-top-left flex-col overflow-hidden rounded-xl border border-border bg-background font-sans text-foreground shadow-[0_24px_64px_-16px_rgb(0_0_0/0.28),0_2px_6px_rgb(0_0_0/0.06)] [scale:min(1,tan(atan2(100cqw,1040px)))] dark:shadow-[0_24px_64px_-12px_rgb(0_0_0/0.7),0_0_0_1px_rgb(255_255_255/0.04)]"
+        className="app-theme absolute top-0 left-0 flex origin-top-left flex-col overflow-hidden rounded-xl border border-border bg-background font-sans text-foreground shadow-[0_24px_64px_-16px_rgb(0_0_0/0.28),0_2px_6px_rgb(0_0_0/0.06)] [scale:min(1,tan(atan2(100cqw,1040px)))] dark:shadow-[0_24px_64px_-12px_rgb(0_0_0/0.7),0_0_0_1px_rgb(255_255_255/0.04)]"
         style={{
           width: DESIGN_WIDTH,
           height: DESIGN_HEIGHT,

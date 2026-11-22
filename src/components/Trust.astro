@@ -15,7 +15,7 @@ const icons = ['database', 'square-terminal', 'list-checks', 'shield-check'] as 
     {
       trustPoints.map((point, i) => (
         <li class="rounded-xl border border-border bg-card p-6 text-card-foreground">
-          <div class="flex size-10 items-center justify-center rounded-lg bg-muted">
+          <div class="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Icon name={icons[i] ?? 'shield-check'} class="size-5" />
           </div>
           <h3 class="mt-4 text-lg font-semibold tracking-tight">{point.title}</h3>

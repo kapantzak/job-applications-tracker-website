@@ -4,29 +4,66 @@ import CopyCommand from './CopyCommand';
 import Icon from './Icon.astro';
 ---
 
-<section id="hero" class="mx-auto w-full max-w-6xl px-4 pt-14 pb-16 sm:px-6 sm:pt-24 sm:pb-24 lg:px-8">
-  <div class="mx-auto max-w-3xl text-center">
-    <h1 class="text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">{hero.headline}</h1>
-    <p class="mx-auto mt-6 max-w-2xl text-lg text-pretty text-muted-foreground sm:text-xl">{hero.subhead}</p>
-    <div class="mt-10 flex flex-col items-center gap-4">
-      <CopyCommand client:load command={INSTALL_NPX} location="hero" />
-      <p class="text-sm text-muted-foreground">{sections.hero.requirements}</p>
-      <div class="flex flex-wrap items-center justify-center gap-3">
-        <a
-          href={LINKS.github}
-          class="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
-        >
-          <Icon name="github" class="size-4" />
-          {sections.hero.github}
-        </a>
-        <a
-          href={LINKS.npm}
-          class="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
-        >
-          {sections.hero.npm}
-          <Icon name="external-link" class="size-3.5" />
-        </a>
+<section id="hero" class="relative">
+  {/* Decorative brand band. It reaches up behind the transparent header (h-16) and sits at a negative z-index so
+      the header and hero content paint on top. The section is full width, so the band never adds overflow. */}
+  <div aria-hidden="true" class="hero-band pointer-events-none absolute inset-x-0 -top-16 bottom-0 -z-10"></div>
+  <div class="mx-auto w-full max-w-6xl px-4 pt-14 pb-16 sm:px-6 sm:pt-24 sm:pb-24 lg:px-8">
+    <div class="mx-auto max-w-3xl text-center">
+      <h1 class="text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl">{hero.headline}</h1>
+      <p class="mx-auto mt-6 max-w-2xl text-lg text-pretty text-muted-foreground sm:text-xl">{hero.subhead}</p>
+      <div class="mt-10 flex flex-col items-center gap-4">
+        <CopyCommand client:load command={INSTALL_NPX} location="hero" />
+        <p class="text-sm text-muted-foreground">{sections.hero.requirements}</p>
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <a
+            href={LINKS.github}
+            class="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
+          >
+            <Icon name="github" class="size-4" />
+            {sections.hero.github}
+          </a>
+          <a
+            href={LINKS.npm}
+            class="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
+          >
+            {sections.hero.npm}
+            <Icon name="external-link" class="size-3.5" />
+          </a>
+        </div>
       </div>
     </div>
   </div>
 </section>
+
+<style>
+  .hero-band {
+    background:
+      linear-gradient(to right, oklch(0.541 0.281 293 / 0.1) 1px, transparent 1px) 0 0 / 48px 48px,
+      linear-gradient(to bottom, oklch(0.541 0.281 293 / 0.1) 1px, transparent 1px) 0 0 / 48px 48px,
+      linear-gradient(
+        160deg,
+        oklch(0.94 0.05 270),
+        oklch(0.89 0.09 293) 35%,
+        oklch(0.9 0.08 315) 65%,
+        oklch(0.94 0.05 335)
+      );
+    /* Fade into the page background instead of ending on a hard edge. */
+    -webkit-mask-image: linear-gradient(black 65%, transparent);
+    mask-image: linear-gradient(black 65%, transparent);
+  }
+  @media (prefers-color-scheme: dark) {
+    .hero-band {
+      background:
+        linear-gradient(to right, oklch(1 0 0 / 0.06) 1px, transparent 1px) 0 0 / 48px 48px,
+        linear-gradient(to bottom, oklch(1 0 0 / 0.06) 1px, transparent 1px) 0 0 / 48px 48px,
+        linear-gradient(
+          160deg,
+          oklch(0.22 0.08 270),
+          oklch(0.28 0.13 293) 35%,
+          oklch(0.26 0.12 315) 65%,
+          oklch(0.21 0.07 335)
+        );
+    }
+  }
+</style>
